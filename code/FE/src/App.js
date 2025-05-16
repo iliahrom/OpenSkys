@@ -18,6 +18,9 @@ import AddDrone from "./components/AddDrone"; // ✅ Component for adding new dr
 import ControlPanel from "./components/ControlPanel";
 import Profile from "./components/Profile";
 import FlightAnimation from "./components/FlightAnimation";
+import ManualSetup from "./components/ManualSetup"; // ✅ Component for manual setup of flight points
+import { UserContext } from "./UserContext";
+
 
 function App() {
   // ✅ State to store the logged-in user
@@ -61,67 +64,78 @@ function App() {
 
   return (
     <Router>
-      {/* ✅ Show Navbar only if user is logged in */}
-      {user && <Navbar user={user} handleLogout={handleLogout} />}
+      <UserContext.Provider value={{ user, setUser }}>
+        {/* ✅ Show Navbar only if user is logged in */}
+        {user && <Navbar user={user} handleLogout={handleLogout} />}
 
-      {/* ✅ Main container for all pages */}
-      <div className="app-container">
-        <Routes>
-          {/* ✅ Protected Routes (Only logged-in users can access) */}
-          <Route
-            path="/"
-            element={
-              user ? <Navigate to="/flight-points" /> : <Navigate to="/login" />
-            }
-          />
-          <Route path="/" element={<FlightAnimation />} />
+        {/* ✅ Main container for all pages */}
+        <div className="app-container">
+          <Routes>
+            {/* ✅ Protected Routes (Only logged-in users can access) */}
+            <Route
+              path="/"
+              element={
+                user ? (
+                  <Navigate to="/flight-points" />
+                ) : (
+                  <Navigate to="/login" />
+                )
+              }
+            />
+            <Route path="/" element={<FlightAnimation />} />
 
-          <Route
-            path="/details/:id"
-            element={user ? <Details /> : <Navigate to="/login" />}
-          />
-          <Route
-            path="/add-drone"
-            element={user ? <AddDrone /> : <Navigate to="/login" />}
-          />
-          <Route
-            path="/about"
-            element={user ? <About /> : <Navigate to="/login" />}
-          />
-          <Route
-            path="/contact"
-            element={user ? <Contact /> : <Navigate to="/login" />}
-          />
-          <Route
-            path="/flight-points"
-            element={user ? <FlightPoints /> : <Navigate to="/login" />}
-          />
+            <Route
+              path="/details/:id"
+              element={user ? <Details /> : <Navigate to="/login" />}
+            />
+            <Route
+              path="/add-drone"
+              element={user ? <AddDrone /> : <Navigate to="/login" />}
+            />
+            <Route
+              path="/about"
+              element={user ? <About /> : <Navigate to="/login" />}
+            />
+            <Route
+              path="/contact"
+              element={user ? <Contact /> : <Navigate to="/login" />}
+            />
+            <Route
+              path="/flight-points"
+              element={user ? <FlightPoints /> : <Navigate to="/login" />}
+            />
 
-          {/* ✅ Authentication Routes (Redirect if user is already logged in) */}
-          <Route
-            path="/login"
-            element={!user ? <Login setUser={setUser} /> : <Navigate to="/" />}
-          />
-          <Route
-            path="/register"
-            element={!user ? <Register /> : <Navigate to="/" />}
-          />
-          <Route
-            path="/control-panel"
-            element={
-              user && user.role === "admin" ? (
-                <ControlPanel />
-              ) : (
-                <Navigate to="/" />
-              )
-            }
-          />
-          <Route
-            path="/profile"
-            element={user ? <Profile /> : <Navigate to="/" />}
-          />
-        </Routes>
-      </div>
+            {/* ✅ Authentication Routes (Redirect if user is already logged in) */}
+            <Route
+              path="/login"
+              element={
+                !user ? <Login setUser={setUser} /> : <Navigate to="/" />
+              }
+            />
+            <Route
+              path="/register"
+              element={!user ? <Register /> : <Navigate to="/" />}
+            />
+            <Route
+              path="/control-panel"
+              element={
+                user && user.role === "admin" ? (
+                  <ControlPanel />
+                ) : (
+                  <Navigate to="/" />
+                )
+              }
+            />
+            <Route
+              path="/profile"
+              element={user ? <Profile /> : <Navigate to="/" />}
+            />
+            {user?.role === "admin" && (
+              <Route path="/manual-setup" element={<ManualSetup />} />
+            )}
+          </Routes>
+        </div>
+      </UserContext.Provider>
     </Router>
   );
 }

@@ -1,9 +1,8 @@
 .container {
   text-align: center;
   padding-top: 80px;
-  background-color: #0d1b2a;
+  background-color: #1d2c2c;
   min-height: 100vh;
-  color: #e0e0e0;
 }
 
 .title {
@@ -20,50 +19,29 @@
   margin-bottom: 20px;
   padding: 8px;
   font-size: 16px;
-  border-radius: 5px;
-  background-color: #1e293b;
-  color: #fff;
-  border: 1px solid #007bff;
-}
-
-.gridWrapper {
-  position: relative;
-  width: max-content;
-  margin: auto;
-}
-
-.base {
-  margin-bottom: 20px;
-  background-color: #005a6e;
-  color: white;
-  font-size: 26px;
-  font-weight: bold;
-  padding: 10px 30px;
-  border-radius: 10px;
-  width: fit-content;
-  margin-left: auto;
-  margin-right: auto;
 }
 
 .grid {
-  display: grid;
-  grid-template-columns: repeat(3, 120px);
-  grid-template-rows: repeat(3, 120px);
+  display: flex;
+  flex-direction: column;
   gap: 10px;
-  background-color: #1e293b;
-  padding: 10px;
-  border-radius: 12px;
-  position: relative;
+  align-items: center;
+}
+
+.gridRow {
+  display: flex;
+  gap: 10px;
 }
 
 .point {
-  width: 100%;
-  height: 100%;
-  font-size: 24px;
-  border: none;
-  border-radius: 10px;
-  background: #007c91;
+  background-color: #007c91;
   color: white;
+  font-size: 24px;
+  padding: 20px 30px;
+  border: 2px solid transparent;
+  border-radius: 10px;
+  width: 100px;
+  height: 100px;
   cursor: pointer;
   transition: 0.3s;
 }
@@ -76,26 +54,159 @@
   border: 3px solid deepskyblue;
 }
 
+.base {
+  background-color: #005a6e;
+  font-size: 28px;
+  margin-bottom: 30px;
+  color: white;
+  padding: 15px 30px;
+  border-radius: 10px;
+}
+
 .dronePath {
   position: absolute;
-  width: 40px;
-  height: 40px;
-  transition: top 2s ease, left 2s ease, transform 0.5s ease;
-  z-index: 10;
+  left: 30%;
+  top: 40%;
+  width: 50px;
+  animation: fly 1s infinite alternate;
 }
 
-.startBtn {
-  margin-top: 30px;
-  padding: 10px 20px;
-  background-color: #00b7ff;
-  border: none;
+.droneImage {
+  position: absolute;
+  width: 60px;
+  height: 60px;
+  z-index: 1000;
+}
+
+.svgOverlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 900;
+}
+
+@keyframes fly {
+  from {
+    transform: translate(0, 0);
+  }
+
+  to {
+    transform: translate(20px, 20px);
+  }
+}
+.card {
+  background: #1e1e1e;
+  padding: 24px;
+  border-radius: 12px;
+  box-shadow: 0 0 10px #000;
   color: white;
-  font-size: 16px;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: background-color 0.3s;
+  max-width: 600px;
+  margin: 40px auto;
 }
 
-.startBtn:hover {
-  background-color: #008ecf;
+.flexRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.setupButton {
+  padding: 10px 20px;
+  background-color: #28a745;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  margin-top: 10px;
+}
+
+.setupButton:hover {
+  background-color: #218838;
+}
+.card {
+  background: #1e1e1e;
+  padding: 24px;
+  border-radius: 12px;
+  box-shadow: 0 0 10px #000;
+  color: white;
+  max-width: 600px;
+  margin: 40px auto;
+}
+
+.flexRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+ul {
+  margin-top: 10px;
+  padding-left: 20px;
+}
+
+li {
+  color: #ccc;
+}
+.inputField {
+  padding: 6px;
+  margin-bottom: 10px;
+  width: 100%;
+  max-width: 200px;
+}
+.flexRow {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.inputField {
+  padding: 6px;
+  width: 120px;
+  font-size: 14px;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+}
+
+.positionGroup {
+  display: flex;
+  flex-direction: column;
+}
+
+.addButton {
+  background-color: #007bff;
+  color: white;
+  padding: 6px 12px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.clearButton {
+  background-color: #0069d9;
+  color: white;
+  padding: 6px 12px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.setupButton {
+  padding: 10px 20px;
+  background-color: #28a745;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  margin-top: 10px;
+}
+
+.setupButton:hover {
+  background-color: #218838;
 }

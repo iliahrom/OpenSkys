@@ -1,6 +1,9 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useRef, useEffect, useContext } from "react";
+import axios from "axios";
 import styles from "../styles/flight.module.css";
 import droneIcon from "../assets/drone.png";
+import { useNavigate } from "react-router-dom";
+import { UserContext } from "../UserContext";
 
 const drones = [
   { id: 1, name: "DJI Tello", status: "Active" },
@@ -11,25 +14,19 @@ const drones = [
 
 const points = ["A", "B", "C", "D", "E", "F", "G", "H", "I"];
 
-const pointCoordinates = {
-  A: { row: 0, col: 0 },
-  B: { row: 0, col: 1 },
-  C: { row: 0, col: 2 },
-  D: { row: 1, col: 0 },
-  E: { row: 1, col: 1 },
-  F: { row: 1, col: 2 },
-  G: { row: 2, col: 0 },
-  H: { row: 2, col: 1 },
-  I: { row: 2, col: 2 },
-};
-
 const FlightPoints = () => {
   const [selectedDrone, setSelectedDrone] = useState(drones[0]);
   const [start, setStart] = useState(null);
   const [end, setEnd] = useState(null);
-  const [dronePos, setDronePos] = useState("BASE");
-  const [hovering, setHovering] = useState(false);
-  const [step, setStep] = useState(-1);
+  const [lineCoords, setLineCoords] = useState(null);
+
+  const pointRefs = useRef({});
+  const droneRef = useRef(null);
+  const containerRef = useRef(null);
+  const baseRef = useRef(null);
+
+  const { user } = useContext(UserContext);
+  const navigate = useNavigate();
 
   const handleDroneChange = (e) => {
     const drone = drones.find(
@@ -39,92 +36,169 @@ const FlightPoints = () => {
   };
 
   const handlePointClick = (point) => {
-    if (!start) setStart(point);
-    else if (!end) setEnd(point);
-    else {
+    if (!start) {
+      setStart(point);
+      setEnd(null);
+    } else if (!end) {
+      setEnd(point);
+    } else {
       setStart(point);
       setEnd(null);
     }
   };
 
+  const sendToDrone = (from, to) => {
+    axios
+      .post("http://localhost:5000/api/flight", { from, to })
+      .then(() => console.log("✅ Sent to drone"))
+      .catch((err) => console.error("❌ Failed sending to drone", err));
+  };
+
   useEffect(() => {
-    if (!start || !end || step === -1) return;
-    const route = [start, "hover1", end, "hover2", "BASE"];
-    const curr = route[step];
-    if (!curr) return;
-
-    if (curr.startsWith("hover")) {
-      setHovering(true);
-      const timeout = setTimeout(() => {
-        setHovering(false);
-        setStep((s) => s + 1);
-      }, 15000);
-      return () => clearTimeout(timeout);
-    } else {
-      setDronePos(curr);
-      const timeout = setTimeout(() => setStep((s) => s + 1), 2000);
-      return () => clearTimeout(timeout);
+    if (start && end) {
+      sendToDrone(start, end);
     }
-  }, [step, start, end]);
+  }, [start, end]);
 
-  const beginFlight = () => {
-    setDronePos("BASE");
-    setStep(0);
+  useEffect(() => {
+    if (
+      start &&
+      end &&
+      pointRefs.current[start] &&
+      pointRefs.current[end] &&
+      baseRef.current &&
+      droneRef.current &&
+      containerRef.current
+    ) {
+      const baseBox = baseRef.current.getBoundingClientRect();
+      const startBox = pointRefs.current[start].getBoundingClientRect();
+      const endBox = pointRefs.current[end].getBoundingClientRect();
+      const containerBox = containerRef.current.getBoundingClientRect();
+      const drone = droneRef.current;
+
+      const getXY = (box) => ({
+        x: box.left - containerBox.left + box.width / 2,
+        y: box.top - containerBox.top + box.height / 2,
+      });
+
+      const basePos = getXY(baseBox);
+      const startPos = getXY(startBox);
+      const endPos = getXY(endBox);
+
+      setLineCoords({
+        x1: startPos.x,
+        y1: startPos.y,
+        x2: endPos.x,
+        y2: endPos.y,
+      });
+
+      const duration = 2000;
+      const frameRate = 1000 / 60;
+      const totalFrames = duration / frameRate;
+
+      drone.style.left = `${basePos.x - 30}px`;
+      drone.style.top = `${basePos.y - 30}px`;
+
+      const animate = (from, to, callback) => {
+        let frame = 0;
+        const interval = setInterval(() => {
+          frame++;
+          const progress = frame / totalFrames;
+          const x = from.x + (to.x - from.x) * progress;
+          const y = from.y + (to.y - from.y) * progress;
+          drone.style.left = `${x - 30}px`;
+          drone.style.top = `${y - 30}px`;
+          if (frame >= totalFrames) {
+            clearInterval(interval);
+            if (callback) setTimeout(callback, 300);
+          }
+        }, frameRate);
+      };
+
+      animate(basePos, startPos, () => {
+        animate(startPos, endPos, () => {
+          animate(endPos, basePos);
+          setTimeout(() => setLineCoords(null), 5000);
+        });
+      });
+    }
+  }, [start, end]);
+
+  const handleSetupClick = () => {
+    navigate("/manual-setup");
   };
 
   return (
-    <div className={styles.container}>
+    <div className={styles.container} ref={containerRef}>
       <h1 className={styles.title}>Flight points</h1>
       <p className={styles.instructions}>
         Please choose flight points, starting point will be colored in green,
         end point in blue.
       </p>
-
       <select onChange={handleDroneChange} className={styles.selectDrone}>
         {drones.map((drone) => (
           <option key={drone.id}>{`${drone.name} - ${drone.status}`}</option>
         ))}
       </select>
 
-      <div className={styles.gridWrapper}>
-        <div className={styles.base}>BASE</div>
-
-        <div className={styles.grid}>
-          {points.map((point) => (
-            <button
-              key={point}
-              className={`${styles.point} ${
-                start === point ? styles.start : ""
-              } ${end === point ? styles.end : ""}`}
-              onClick={() => handlePointClick(point)}
-            >
-              {point}
-            </button>
-          ))}
-
-          <img
-            src={droneIcon}
-            className={styles.dronePath}
-            style={{
-              top:
-                dronePos === "BASE"
-                  ? "-130px"
-                  : `${pointCoordinates[dronePos].row * 120}px`,
-              left:
-                dronePos === "BASE"
-                  ? "120px"
-                  : `${pointCoordinates[dronePos].col * 120}px`,
-              transform: hovering ? "translateY(50px)" : "translateY(0)",
-            }}
-            alt="drone"
-          />
-        </div>
+      <div className={styles.grid}>
+        <button className={styles.base} ref={baseRef}>
+          Base
+        </button>
+        {[0, 3, 6].map((row) => (
+          <div key={row} className={styles.gridRow}>
+            {points.slice(row, row + 3).map((point) => (
+              <button
+                key={point}
+                ref={(el) => (pointRefs.current[point] = el)}
+                className={`${styles.point} ${
+                  start === point ? styles.start : ""
+                } ${end === point ? styles.end : ""}`}
+                onClick={() => handlePointClick(point)}
+              >
+                {point}
+              </button>
+            ))}
+          </div>
+        ))}
+        {lineCoords && (
+          <svg className={styles.svgOverlay}>
+            <line
+              x1={lineCoords.x1}
+              y1={lineCoords.y1}
+              x2={lineCoords.x2}
+              y2={lineCoords.y2}
+              stroke="red"
+              strokeWidth="2"
+              strokeDasharray="5,5"
+            />
+          </svg>
+        )}
       </div>
 
+      {user?.role === "admin" && (
+        <div style={{ marginTop: "20px", textAlign: "center" }}>
+          <button onClick={handleSetupClick} className={styles.setupButton}>
+            Setup Points
+          </button>
+        </div>
+      )}
+
       {start && end && (
-        <button className={styles.startBtn} onClick={beginFlight}>
-          Start Flight
-        </button>
+        <img
+          src={droneIcon}
+          alt="drone"
+          ref={droneRef}
+          className={styles.droneImage}
+          style={{
+            position: "absolute",
+            width: "60px",
+            height: "60px",
+            left: 0,
+            top: 0,
+            zIndex: 1000,
+          }}
+        />
       )}
     </div>
   );

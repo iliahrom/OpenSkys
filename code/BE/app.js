@@ -7,61 +7,60 @@ const dbSingleton = require("./dbSingleton"); // Importing the database connecti
 const authRoutes = require("./routes/authRoutes"); // Authentication routes
 const contactRoutes = require("./routes/contactRoutes"); // Contact form routes
 const droneRoutes = require("./routes/droneRoutes"); // Drone-related routes
+const flightRoute = require("./routes/flightRoute"); // Flight execution logic
+const pointRoutes = require("./routes/pointRoutes"); // Manual setup for point commands ✅
 
 const app = express(); // Initializing the Express app
-const port = 5000; // Defining the port on which the server will run
+const port = 5000; // Port number for the backend server
 
-app.use(express.json()); // Middleware to parse JSON requests
+app.use(express.json()); // Middleware to parse incoming JSON requests
 
-// ✅ Configuring CORS (Cross-Origin Resource Sharing)
-// 🔹 This allows the frontend (React app) to communicate with the backend
+// ✅ Enable CORS (for frontend <-> backend communication)
 app.use(
   cors({
-    origin: ["http://localhost:3000", "http://127.0.0.1:3000"], // Allow frontend requests
-    credentials: true, // Allow sending cookies (important for authentication)
+    origin: ["http://localhost:3000", "http://127.0.0.1:3000"],
+    credentials: true,
   })
 );
 
-// ✅ Setting up session management
-// 🔹 This allows users to stay logged in between requests
+// ✅ Setup session management
 app.use(
   session({
-    secret: "mySecretKey", // Secret key used to sign session data (should be in environment variables)
-    resave: false, // Prevents unnecessary session saving
-    saveUninitialized: false, // Don't save empty sessions
+    secret: "mySecretKey",
+    resave: false,
+    saveUninitialized: false,
     cookie: {
-      secure: false, // Set to `true` in production (requires HTTPS)
-      httpOnly: true, // Prevents client-side access to cookies
-      sameSite: "lax", // Helps prevent CSRF attacks
-      maxAge: 1000 * 60 * 60, // Session expires in 1 hour(or manually by logout)
+      secure: false,
+      httpOnly: true,
+      sameSite: "lax",
+      maxAge: 1000 * 60 * 60, // 1 hour
     },
   })
 );
 
-// ✅ Connecting to the database and testing the connection
+// ✅ Test DB connection
 const db = dbSingleton.getConnection();
 db.query("SELECT 1", (err) => {
   if (err) {
-    console.error("❌ Database connection failed:", err); // Log error if connection fails
+    console.error("❌ Database connection failed:", err);
   } else {
-    console.log("✅ Connected to MySQL database!"); // Log success if connected
+    console.log("✅ Connected to MySQL database!");
   }
 });
 
-// ✅ Registering API routes
-// 🔹 These define the available API endpoints for different parts of the system
-app.use("/api/auth", authRoutes); // Authentication endpoints
-app.use("/api/contact", contactRoutes); // Contact form endpoints
-app.use("/api/drones", droneRoutes); // Drone management endpoints
+// ✅ Register API routes
+app.use("/api/auth", authRoutes);
+app.use("/api/contact", contactRoutes);
+app.use("/api/drones", droneRoutes);
+app.use("/api/flight", flightRoute);
+app.use("/api/points", pointRoutes); // ✅ Added line for admin setup of flight points
 
-// ✅ Health check route
-// 🔹 This allows checking if the server is running
+// ✅ Health check
 app.get("/", (req, res) => {
-  res.send("✅ Server is running!"); // Returns a success message
+  res.send("✅ Server is running!");
 });
 
-// ✅ Starting the server
-// 🔹 This makes the backend accessible on port 5000
+// ✅ Start the server
 app.listen(port, "localhost", () => {
-  console.log(`🚀 Server running on port ${port}`); // Log confirmation message
+  console.log(`🚀 Server running on port ${port}`);
 });
