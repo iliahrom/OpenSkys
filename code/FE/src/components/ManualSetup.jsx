@@ -4,7 +4,6 @@ import styles from "../styles/flight.module.css";
 
 const POINTS = ["BASE", "A", "B", "C", "D", "E", "F", "G", "H", "I"];
 const COMMAND_OPTIONS = [
-  "command",
   "takeoff",
   "land",
   "forward 50",
@@ -46,10 +45,7 @@ export default function ManualSetup() {
   };
 
   const handleSave = async () => {
-    if (commands.length === 0) {
-      setMessage("No commands to save.");
-      return;
-    }
+    console.log("🛰 Saving point with:", { commands, x, y });
 
     try {
       const response = await axios.post(
@@ -60,7 +56,7 @@ export default function ManualSetup() {
       setMessage(response.data.message || "Saved successfully.");
     } catch (err) {
       console.error(err);
-      setMessage(err.response?.data?.error || "Failed to save commands.");
+      setMessage(err.response?.data?.error || "Failed to save position.");
     }
   };
 
@@ -81,7 +77,6 @@ export default function ManualSetup() {
         ))}
       </select>
 
-      {/* שורות קלט X/Y מיושרות לשורה אחת */}
       <div className={styles.flexRow}>
         <div className={styles.positionGroup}>
           <label>X Position (cm):</label>

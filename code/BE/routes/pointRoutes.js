@@ -6,51 +6,46 @@ const router = express.Router();
 
 /**
  * @route   POST /api/points/:label
- * @desc    Save or update command sequence and position for a flight point
+ * @desc    Save or update position and command sequence for a flight point
  * @access  Admin only
  */
 router.post("/:label", adminMiddleware, async (req, res) => {
   const { label } = req.params;
-  const { commands, x = 0, y = 0 } = req.body;
+  const { x = 0, y = 0, commands = [] } = req.body;
 
-  // Debug log
-  console.log("📥 POST /api/points:", {
-    label,
-    commands,
+  const commandString = Array.isArray(commands) ? commands.join(",") : "";
+
+  console.log("🔗 Saving to DB:", {
+    label: label.toUpperCase(),
+    commandString,
     x,
     y,
-    user: req.session?.user,
   });
-
-  if (!commands || !Array.isArray(commands)) {
-    return res
-      .status(400)
-      .json({ error: "Commands must be a non-empty array." });
-  }
 
   try {
     const connection = db.getConnection();
 
     const query = `
-      REPLACE INTO point_commands (point_label, command_sequence, x, y)
+      REPLACE INTO point_commands (point_label, command_sequence, x_offset, y_offset)
       VALUES (?, ?, ?, ?)
     `;
 
     await connection
       .promise()
-      .query(query, [label.toUpperCase(), commands.join(","), x, y]);
+      .query(query, [label.toUpperCase(), commandString, x, y]);
 
-    res.json({ message: `✅ Commands for point '${label}' saved.` });
+    res.json({
+      message: `✅ Point '${label}' saved with position and commands.`,
+    });
   } catch (error) {
-    console.error("❌ Error saving point commands:", error.message, error);
-    res.status(500).json({ error: "Failed to save point commands." });
+    console.error("❌ Error saving point:", error.message, error);
+    res.status(500).json({ error: "Failed to save point." });
   }
 });
 
 /**
  * @route   GET /api/points
- * @desc    Retrieve all stored point commands
- * @access  Optional: can add authMiddleware if needed
+ * @desc    Retrieve all stored points with their positions and commands
  */
 router.get("/", async (req, res) => {
   try {
@@ -61,8 +56,8 @@ router.get("/", async (req, res) => {
 
     res.json(rows);
   } catch (error) {
-    console.error("❌ Error fetching point commands:", error.message, error);
-    res.status(500).json({ error: "Failed to fetch point commands." });
+    console.error("❌ Error fetching points:", error.message, error);
+    res.status(500).json({ error: "Failed to fetch points." });
   }
 });
 
