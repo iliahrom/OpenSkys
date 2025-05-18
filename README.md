@@ -51,3 +51,38 @@ Designed for practical classroom demonstrations using DJI Tello drones.
 ```bash
 git clone https://github.com/iliahrom/OpenSkys.git
 cd OpenSkys
+
+###2.Setup the backend
+cd code/BE
+npm install
+node app.js
+
+###3.Setup the frontend
+cd ../FE
+npm install
+npm start
+###4.Import database
+Use the drones_project.sql file located in /code/SQL/ to create the database schema
+
+🧪 Demo Users
+| Role      | Password  |UserName      |
+|-----------|-----------|--------------|
+| Admin     | admin123  |admin@test.com|
+| User      | user123   |user@test.com |
+You can customize roles in the users table (role = 'admin' or 'user')
+
+## Project Structure
+OpenSkys/
+├── code/
+│   ├── BE/            # Express backend
+│   ├── FE/            # React frontend
+│   └── SQL/           # Database schema
+├── public/            # Assets
+└── README.md
+
+✍️Author
+Ilia Hromchenko
+📫 iliahrom@gmail.com
+
+Bar Pahima
+📫barpahima33@gmail.com
