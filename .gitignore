@@ -1,0 +1,9 @@
+# Ignore node_modules
+node_modules/
+
+# Ignore environment files (אם תעבוד בעתיד עם כאלה)
+.env
+
+# Ignore build files (אם תבנה בעתיד את הפרויקט)
+dist/
+build/
