@@ -1,0 +1,111 @@
+.container {
+  text-align: center;
+  padding-top: 80px;
+  background-color: #1d2c2c;
+  min-height: 100vh;
+}
+
+.title {
+  font-size: 2em;
+  color: #00d4ff;
+}
+
+.instructions {
+  color: #ccc;
+  margin-bottom: 10px;
+}
+
+.selectDrone {
+  margin-bottom: 20px;
+  padding: 8px;
+  font-size: 16px;
+}
+
+.grid {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  align-items: center;
+}
+
+.gridRow {
+  display: flex;
+  gap: 10px;
+}
+
+.point {
+  background-color: #007c91;
+  color: white;
+  font-size: 18px;
+  /* היה 24px */
+  padding: 12px 18px;
+  /* היה 20px 30px */
+  border: 2px solid transparent;
+  border-radius: 10px;
+  width: 70px;
+  /* היה 100px */
+  height: 70px;
+  /* היה 100px */
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.start {
+  border: 3px solid limegreen;
+}
+
+.end {
+  border: 3px solid deepskyblue;
+}
+
+.base {
+  background-color: #005a6e;
+  font-size: 28px;
+  margin-bottom: 30px;
+  color: white;
+  padding: 15px 30px;
+  border-radius: 10px;
+}
+
+.dronePath {
+  position: absolute;
+  left: 30%;
+  top: 40%;
+  width: 50px;
+  animation: fly 1s infinite alternate;
+}
+
+.controls {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  margin-top: 30px;
+}
+
+
+.droneImage {
+  position: absolute;
+  width: 60px;
+  height: 60px;
+  z-index: 1000;
+}
+
+.svgOverlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 900;
+}
+
+@keyframes fly {
+  from {
+    transform: translate(0, 0);
+  }
+
+  to {
+    transform: translate(20px, 20px);
+  }
+}
