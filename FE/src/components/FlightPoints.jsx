@@ -222,6 +222,8 @@ const FlightPoints = () => {
   );
 };
 
+export default FlightPoints;
+
 
 
 
