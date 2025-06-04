@@ -4,23 +4,25 @@ import styles from "../styles/flight.module.css";
 import droneIcon from "../assets/drone.png";
 
 const FlightPoints = () => {
-  const [points, setPoints] = useState([]); // מגיע מה-DB
+  const [points, setPoints] = useState([]);
   const [selectedPoints, setSelectedPoints] = useState([]);
   const [wifiList, setWifiList] = useState([]);
   const [selectedWifi, setSelectedWifi] = useState("");
   const [lines, setLines] = useState([]);
+  const [pathName, setPathName] = useState("");
+  const [savedPaths, setSavedPaths] = useState([]);
+  const [selectedSavedPathId, setSelectedSavedPathId] = useState(null);
+
   const pointRefs = useRef({});
   const droneRef = useRef(null);
   const containerRef = useRef(null);
   const baseRef = useRef(null);
 
-  const handlePointClick = (pointName) => {
-    setSelectedPoints((prev) =>
-      prev.includes(pointName)
-        ? prev.filter((p) => p !== pointName)
-        : [...prev, pointName]
-    );
-  };
+  useEffect(() => {
+    fetchWifiNetworks();
+    fetchPointsFromDB();
+    fetchSavedPaths();
+  }, []);
 
   const fetchPointsFromDB = async () => {
     try {
@@ -40,10 +42,32 @@ const FlightPoints = () => {
     }
   };
 
+  const fetchSavedPaths = async () => {
+    try {
+      const res = await axios.get("http://localhost:5000/api/paths");
+      setSavedPaths(res.data);
+    } catch (err) {
+      console.error("❌ Failed to fetch saved paths:", err);
+    }
+  };
+
+  const handlePointClick = (pointName) => {
+    setSelectedPoints((prev) =>
+      prev.includes(pointName)
+        ? prev.filter((p) => p !== pointName)
+        : [...prev, pointName]
+    );
+  };
+
+  const handleWifiSelect = (e) => {
+    const ssid = e.target.value;
+    setSelectedWifi(ssid);
+    connectToWifi(ssid);
+  };
+
   const connectToWifi = async (ssid) => {
     try {
       await axios.post("http://localhost:5000/api/wifi/connect", { ssid });
-      console.log("📶 Connected to", ssid);
     } catch (err) {
       console.error("❌ Failed to connect to WiFi", err);
     }
@@ -52,13 +76,43 @@ const FlightPoints = () => {
   const sendToDrone = async () => {
     if (selectedPoints.length < 2) return;
     try {
-      await axios.post("http://localhost:5000/api/flight", {
-        path: selectedPoints,
-      });
+      await axios.post("http://localhost:5000/api/flight", { path: selectedPoints });
       animateFlight(selectedPoints);
     } catch (err) {
       console.error("❌ Failed sending to drone", err);
     }
+  };
+
+  const savePathToDB = async () => {
+    if (!pathName || selectedPoints.length < 2) return alert("Enter a path name and at least 2 points");
+    try {
+      await axios.post("http://localhost:5000/api/paths", {
+        name: pathName,
+        points: selectedPoints,
+      });
+      alert("✅ Path saved successfully!");
+      setPathName("");
+      fetchSavedPaths();
+    } catch (err) {
+      console.error("❌ Failed to save path:", err);
+      alert("❌ Failed to save path");
+    }
+  };
+
+  const loadSavedPath = async () => {
+    if (!selectedSavedPathId) return alert("Select a path to load");
+    const selected = savedPaths.find(p => p.id === parseInt(selectedSavedPathId));
+    if (selected) {
+      const pointList = selected.points;
+      setSelectedPoints(pointList);
+      animateFlight(pointList);
+    }
+  };
+
+  const clearPoints = () => {
+    setSelectedPoints([]);
+    setLines([]);
+    setPathName("");
   };
 
   const getXY = (el) => {
@@ -107,8 +161,7 @@ const FlightPoints = () => {
     const flightLines = [];
 
     for (let i = 0; i < pointNames.length; i++) {
-      const fromEl =
-        i === 0 ? base : pointRefs.current[pointNames[i - 1]];
+      const fromEl = i === 0 ? base : pointRefs.current[pointNames[i - 1]];
       const toEl = pointRefs.current[pointNames[i]];
       if (!fromEl || !toEl) continue;
       const from = getXY(fromEl);
@@ -126,32 +179,10 @@ const FlightPoints = () => {
     setTimeout(() => setLines([]), 5000);
   };
 
-  useEffect(() => {
-    fetchWifiNetworks();
-    fetchPointsFromDB();
-  }, []);
-
-  useEffect(() => {
-    console.log("📌 Points from DB:", points); // תוסיף את זה
-  }, [points]);
-
-  const handleWifiSelect = (e) => {
-    const ssid = e.target.value;
-    setSelectedWifi(ssid);
-    connectToWifi(ssid);
-  };
-
-  const clearPoints = () => {
-    setSelectedPoints([]);
-    setLines([]);
-  };
-
   return (
     <div className={styles.container} ref={containerRef}>
       <h1 className={styles.title}>Flight points</h1>
-      <p className={styles.instructions}>
-        Select multiple points to create a flight path.
-      </p>
+      <p className={styles.instructions}>Select multiple points to create a flight path.</p>
 
       <select onChange={handleWifiSelect} className={styles.selectDrone} value={selectedWifi}>
         <option disabled value="">Select a TELLO network</option>
@@ -161,26 +192,22 @@ const FlightPoints = () => {
       </select>
 
       <div className={styles.grid}>
-        <button className={styles.base} ref={baseRef} id="Base">Base</button>
-
+        <button className={styles.base} ref={baseRef}>Base</button>
         {[0, 1, 2].map((rowVal) => (
           <div key={rowVal} className={styles.gridRow}>
-            {points
-              .filter((p) => p.row === rowVal)
-              .sort((a, b) => a.col - b.col)
-              .map((point) => (
-                <button
-                  key={point.id}
-                  ref={(el) => (pointRefs.current[point.name] = el)}
-                  className={`${styles.point} ${selectedPoints.includes(point.name) ? styles.start : ""}`}
-                  onClick={() => handlePointClick(point.name)}
-                >
-                  {point.name}
-                </button>
-              ))}
+            {points.filter((p) => p.row === rowVal).sort((a, b) => a.col - b.col).map((point) => (
+              <button
+                key={point.id}
+                ref={(el) => (pointRefs.current[point.name] = el)}
+                className={`${styles.point} ${selectedPoints.includes(point.name) ? styles.start : ""}`}
+
+                onClick={() => handlePointClick(point.name)}
+              >
+                {point.name}
+              </button>
+            ))}
           </div>
         ))}
-
 
         {lines.map((line, idx) => (
           <svg key={idx} className={styles.svgOverlay}>
@@ -215,22 +242,31 @@ const FlightPoints = () => {
       </div>
 
       <div className={styles.controls}>
+        <input
+          type="text"
+          placeholder="Enter path name"
+          value={pathName}
+          onChange={(e) => setPathName(e.target.value)}
+          className={styles.pathInput}
+        />
+        <button onClick={savePathToDB}>Save Path</button>
         <button onClick={sendToDrone}>Start Flight</button>
         <button onClick={clearPoints}>Clear Points</button>
+        <select
+          value={selectedSavedPathId || ""}
+          onChange={(e) => setSelectedSavedPathId(e.target.value)}
+          className={styles.selectPath}
+        >
+          <option value="">-- Select Saved Path --</option>
+          {savedPaths.map((path) => (
+            <option key={path.id} value={path.id}>{path.name}</option>
+          ))}
+        </select>
+        <button onClick={loadSavedPath}>Run Saved Path</button>
       </div>
-    </div>
+
+    </div >
   );
 };
 
 export default FlightPoints;
-
-
-
-
-
-
-
-
-
-
-

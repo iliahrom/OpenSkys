@@ -1,3 +1,4 @@
+/* מבנה כללי */
 .container {
   text-align: center;
   padding-top: 80px;
@@ -15,12 +16,7 @@
   margin-bottom: 10px;
 }
 
-.selectDrone {
-  margin-bottom: 20px;
-  padding: 8px;
-  font-size: 16px;
-}
-
+/* רשת הנקודות */
 .grid {
   display: flex;
   flex-direction: column;
@@ -33,19 +29,16 @@
   gap: 10px;
 }
 
+/* נקודות ומצב נבחר */
 .point {
   background-color: #007c91;
   color: white;
   font-size: 18px;
-  /* היה 24px */
   padding: 12px 18px;
-  /* היה 20px 30px */
   border: 2px solid transparent;
   border-radius: 10px;
   width: 70px;
-  /* היה 100px */
   height: 70px;
-  /* היה 100px */
   cursor: pointer;
   transition: 0.3s;
 }
@@ -67,22 +60,44 @@
   border-radius: 10px;
 }
 
-.dronePath {
-  position: absolute;
-  left: 30%;
-  top: 40%;
-  width: 50px;
-  animation: fly 1s infinite alternate;
-}
-
+/* כפתורים ושדות */
 .controls {
   display: flex;
+  flex-wrap: wrap;
   justify-content: center;
-  gap: 20px;
+  align-items: center;
+  gap: 12px;
   margin-top: 30px;
 }
 
+button {
+  padding: 10px 16px;
+  font-size: 15px;
+  border-radius: 6px;
+  border: none;
+  background-color: #007bff;
+  color: white;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
 
+button:hover {
+  background-color: #0056b3;
+}
+
+.pathInput,
+.selectPath,
+.selectDrone {
+  padding: 10px;
+  font-size: 16px;
+  border-radius: 6px;
+  border: none;
+  background-color: #2e2e2e;
+  color: white;
+  min-width: 200px;
+}
+
+/* עיצוב לרחפן והקוים */
 .droneImage {
   position: absolute;
   width: 60px;
@@ -100,6 +115,7 @@
   z-index: 900;
 }
 
+/* אנימציית רחפן */
 @keyframes fly {
   from {
     transform: translate(0, 0);

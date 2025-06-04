@@ -59,6 +59,8 @@ app.use("/api/drones", droneRoutes); // Drone management endpoints
 app.use("/api/flight", flightRoute);
 app.use('/api/wifi', wifiRoutes);
 app.use('/api/points', pointsRoutes);
+app.use('/api/paths', require('./routes/pathRoutes'));
+
 
 // ✅ Health check route
 // 🔹 This allows checking if the server is running
