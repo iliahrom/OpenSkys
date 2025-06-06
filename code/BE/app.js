@@ -9,6 +9,7 @@ const contactRoutes = require("./routes/contactRoutes");
 const droneRoutes = require("./routes/droneRoutes");
 const flightRoute = require("./routes/flightRoute");
 const pointRoutes = require("./routes/pointRoutes");
+const movementRoutes = require("./routes/movement");//link to movement logic
 
 const app = express();
 const port = 5000;
@@ -59,6 +60,7 @@ app.use("/api/contact", contactRoutes);
 app.use("/api/drones", droneRoutes);
 app.use("/api/flight", flightRoute);
 app.use("/api/points", pointRoutes);
+app.use("/api/move", movementRoutes);
 
 // ✅ Health check
 app.get("/", (req, res) => {

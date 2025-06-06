@@ -3,7 +3,7 @@ import axios from "axios";
 import styles from "../styles/flight.module.css";
 import droneIcon from "../assets/drone.png";
 
-const FlightPoints = () => {
+const FlightPoints = ({ user }) => {
   const [points, setPoints] = useState([]);
   const [selectedPoints, setSelectedPoints] = useState([]);
   const [wifiList, setWifiList] = useState([]);
@@ -74,17 +74,31 @@ const FlightPoints = () => {
   };
 
   const sendToDrone = async () => {
-    if (selectedPoints.length < 2) return;
+    if (selectedPoints.length < 2 || !user?.id) return;
+
     try {
-      await axios.post("http://localhost:5000/api/flight", { path: selectedPoints });
+      // Send flight path to drone
+      await axios.post("http://localhost:5000/api/flight", {
+        path: selectedPoints,
+      });
+
+      // Save the flight to history
+      await axios.post("http://localhost:5000/api/flight/history/save", {
+        user_id: user.id,
+        path_name: pathName || "Unnamed Path",
+        points: selectedPoints,
+      });
+
+      // Animate drone movement
       animateFlight(selectedPoints);
     } catch (err) {
-      console.error("❌ Failed sending to drone", err);
+      console.error("❌ Failed sending to drone or saving history", err);
     }
   };
 
   const savePathToDB = async () => {
-    if (!pathName || selectedPoints.length < 2) return alert("Enter a path name and at least 2 points");
+    if (!pathName || selectedPoints.length < 2)
+      return alert("Enter a path name and at least 2 points");
     try {
       await axios.post("http://localhost:5000/api/paths", {
         name: pathName,
@@ -101,7 +115,9 @@ const FlightPoints = () => {
 
   const loadSavedPath = async () => {
     if (!selectedSavedPathId) return alert("Select a path to load");
-    const selected = savedPaths.find(p => p.id === parseInt(selectedSavedPathId));
+    const selected = savedPaths.find(
+      (p) => p.id === parseInt(selectedSavedPathId)
+    );
     if (selected) {
       const pointList = selected.points;
       setSelectedPoints(pointList);
@@ -172,7 +188,12 @@ const FlightPoints = () => {
 
     const lastEl = pointRefs.current[pointNames[pointNames.length - 1]];
     const lastPos = getXY(lastEl);
-    flightLines.push({ x1: lastPos.x, y1: lastPos.y, x2: basePos.x, y2: basePos.y });
+    flightLines.push({
+      x1: lastPos.x,
+      y1: lastPos.y,
+      x2: basePos.x,
+      y2: basePos.y,
+    });
     await moveDrone(lastEl, base);
 
     setLines(flightLines);
@@ -182,30 +203,53 @@ const FlightPoints = () => {
   return (
     <div className={styles.container} ref={containerRef}>
       <h1 className={styles.title}>Flight points</h1>
-      <p className={styles.instructions}>Select multiple points to create a flight path.</p>
+      <p className={styles.instructions}>
+        Select multiple points to create a flight path.
+      </p>
 
-      <select onChange={handleWifiSelect} className={styles.selectDrone} value={selectedWifi}>
-        <option disabled value="">Select a TELLO network</option>
+      <select
+        onChange={handleWifiSelect}
+        className={styles.selectDrone}
+        value={selectedWifi}
+      >
+        <option disabled value="">
+          Select a TELLO network
+        </option>
         {wifiList.map((ssid, index) => (
-          <option key={index} value={ssid}>{ssid}</option>
+          <option key={index} value={ssid}>
+            {ssid}
+          </option>
         ))}
       </select>
 
       <div className={styles.grid}>
-        <button className={styles.base} ref={baseRef}>Base</button>
+        <button className={styles.base} ref={baseRef}>
+          Base
+        </button>
         {[0, 1, 2].map((rowVal) => (
           <div key={rowVal} className={styles.gridRow}>
-            {points.filter((p) => p.row === rowVal).sort((a, b) => a.col - b.col).map((point) => (
-              <button
-                key={point.id}
-                ref={(el) => (pointRefs.current[point.name] = el)}
-                className={`${styles.point} ${selectedPoints.includes(point.name) ? styles.start : ""}`}
-
-                onClick={() => handlePointClick(point.name)}
-              >
-                {point.name}
-              </button>
-            ))}
+            {points
+              .filter((p) => p.row === rowVal)
+              .sort((a, b) => a.col - b.col)
+              .map((point) => (
+                <button
+                  key={point.id}
+                  ref={(el) => (pointRefs.current[point.name] = el)}
+                  className={`${styles.point} ${
+                    selectedPoints.includes(point.name) ? styles.start : ""
+                  }`}
+                  onClick={() => handlePointClick(point.name)}
+                >
+                  <>
+                    {point.name}
+                    {selectedPoints.includes(point.name) && (
+                      <span className={styles.pointOrder}>
+                        {selectedPoints.indexOf(point.name)}
+                      </span>
+                    )}
+                  </>
+                </button>
+              ))}
           </div>
         ))}
 
@@ -242,6 +286,18 @@ const FlightPoints = () => {
       </div>
 
       <div className={styles.controls}>
+        <button
+          className={styles.downloadButton}
+          onClick={() =>
+            window.open(
+              `http://localhost:5000/api/flight/history/download?user_id=23`,
+              "_blank"
+            )
+          }
+        >
+          Download Flight History as CSV
+        </button>
+
         <input
           type="text"
           placeholder="Enter path name"
@@ -259,13 +315,14 @@ const FlightPoints = () => {
         >
           <option value="">-- Select Saved Path --</option>
           {savedPaths.map((path) => (
-            <option key={path.id} value={path.id}>{path.name}</option>
+            <option key={path.id} value={path.id}>
+              {path.name}
+            </option>
           ))}
         </select>
         <button onClick={loadSavedPath}>Run Saved Path</button>
       </div>
-
-    </div >
+    </div>
   );
 };
 

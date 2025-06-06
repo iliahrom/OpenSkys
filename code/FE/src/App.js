@@ -20,7 +20,7 @@ import Profile from "./components/Profile";
 import FlightAnimation from "./components/FlightAnimation";
 import ManualSetup from "./components/ManualSetup"; // ✅ Component for manual setup of flight points
 import { UserContext } from "./UserContext";
-
+import MoveBetweenPoints from "./components/MoveBetweenPoints"; // ✅ Component for moving between points
 
 function App() {
   // ✅ State to store the logged-in user
@@ -133,6 +133,7 @@ function App() {
             {user?.role === "admin" && (
               <Route path="/manual-setup" element={<ManualSetup />} />
             )}
+            <Route path="/admin/move" element={<MoveBetweenPoints />} />
           </Routes>
         </div>
       </UserContext.Provider>

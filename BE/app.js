@@ -8,8 +8,9 @@ const authRoutes = require("./routes/authRoutes"); // Authentication routes
 const contactRoutes = require("./routes/contactRoutes"); // Contact form routes
 const droneRoutes = require("./routes/droneRoutes"); // Drone-related routes
 const flightRoute = require("./routes/flightRoute");
-const wifiRoutes = require('./routes/wifiRoutes');
-const pointsRoutes = require('./routes/points');
+const wifiRoutes = require("./routes/wifiRoutes");
+const pointsRoutes = require("./routes/points");
+const historyRoutes = require("./routes/historyRoutes");
 
 const app = express(); // Initializing the Express app
 const port = 5000; // Defining the port on which the server will run
@@ -57,10 +58,10 @@ app.use("/api/auth", authRoutes); // Authentication endpoints
 app.use("/api/contact", contactRoutes); // Contact form endpoints
 app.use("/api/drones", droneRoutes); // Drone management endpoints
 app.use("/api/flight", flightRoute);
-app.use('/api/wifi', wifiRoutes);
-app.use('/api/points', pointsRoutes);
-app.use('/api/paths', require('./routes/pathRoutes'));
-
+app.use("/api/wifi", wifiRoutes);
+app.use("/api/points", pointsRoutes);
+app.use("/api/paths", require("./routes/pathRoutes"));
+app.use("/api/flight/history", historyRoutes);
 
 // ✅ Health check route
 // 🔹 This allows checking if the server is running

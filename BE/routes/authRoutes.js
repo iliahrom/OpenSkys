@@ -34,6 +34,14 @@ router.post("/logout", logoutUser);
 router.get("/session", getCurrentUser);
 // ✅ Exporting the router to be used in `app.js`
 
+//return the current session user
+router.get("/me", (req, res) => {
+  if (!req.session.user) {
+    return res.status(401).json({ error: "Not logged in" });
+  }
+  res.json(req.session.user);
+});
+
 router.get("/users", async (req, res) => {
   try {
     const connection = db.getConnection(); // ✅ Important: get connection first

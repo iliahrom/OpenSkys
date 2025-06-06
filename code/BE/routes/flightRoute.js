@@ -3,54 +3,107 @@ const router = express.Router();
 const dgram = require('dgram');
 const client = dgram.createSocket('udp4');
 
-const pointCoordinates = {
-  A: { x: 0, y: 0 },
-  B: { x: 50, y: 0 },
-  C: { x: 100, y: 0 },
-  D: { x: 0, y: 50 },
-  E: { x: 50, y: 50 },
-  F: { x: 200, y:150 },
-  G: { x: 0, y: 100 },
-  H: { x: 50, y: 100 },
-  I: { x: 200, y: 200 },
+const gridCoordinates = {
+  A: { col: 0, row: 0 },
+  B: { col: 1, row: 0 },
+  C: { col: 2, row: 0 },
+  D: { col: 0, row: 1 },
+  E: { col: 1, row: 1 },
+  F: { col: 2, row: 1 },
+  G: { col: 0, row: 2 },
+  H: { col: 1, row: 2 },
+  I: { col: 2, row: 2 },
 };
 
-const sendCommand = (cmd, delay = 1000) => {
+const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+const sendCommandSmart = (cmd) => {
   return new Promise((resolve) => {
-    console.log("Sending:", cmd);
+    let delayMs = 1000;
+    const lowerCmd = cmd.toLowerCase();
+
+    if (lowerCmd.includes("takeoff") || lowerCmd.includes("land")) {
+      delayMs = 3000;
+    } else if (
+      lowerCmd.startsWith("forward") ||
+      lowerCmd.startsWith("back") ||
+      lowerCmd.startsWith("left") ||
+      lowerCmd.startsWith("right")
+    ) {
+      const parts = lowerCmd.split(" ");
+      const dist = parseInt(parts[1]) || 0;
+      delayMs = 1000 + dist * 10;
+    }
+
+    console.log("📡 Sending:", cmd, "| Delay:", delayMs);
     client.send(cmd, 0, cmd.length, 8889, '192.168.10.1', () => {
-      setTimeout(resolve, delay);
+      setTimeout(resolve, delayMs);
     });
   });
 };
 
+const moveInSteps = async (direction, distance) => {
+  const MAX = 500;
+  let remaining = Math.abs(distance);
+  while (remaining > 0) {
+    const step = Math.min(MAX, remaining);
+    await sendCommandSmart(`${direction} ${step}`);
+    remaining -= step;
+  }
+};
+
 router.post('/', async (req, res) => {
-  const { from, to } = req.body;
-  const start = pointCoordinates[from];
-  const end = pointCoordinates[to];
+  const { path } = req.body;
+  if (!Array.isArray(path) || path.length < 2) {
+    return res.status(400).json({ error: 'Path must contain at least two points' });
+  }
 
-  if (!start || !end) return res.status(400).json({ error: 'Invalid points' });
-
-  const dx = end.x - start.x;
-  const dy = end.y - start.y;
+  const unit = 100;
 
   try {
-    await sendCommand('command');
-    await sendCommand('takeoff');
+    console.log("🔁 Sending 'command'...");
+    await sendCommandSmart('command');
 
-    if (dy !== 0) {
-      await sendCommand(dy > 0 ? `forward ${Math.abs(dy)}` : `back ${Math.abs(dy)}`);
-    }
-    if (dx !== 0) {
-      await sendCommand(dx > 0 ? `right ${Math.abs(dx)}` : `left ${Math.abs(dx)}`);
+    console.log("🛫 Sending 'takeoff'...");
+    await sendCommandSmart('takeoff');
+
+    console.log("⏳ Stabilizing...");
+    await delay(5000);
+
+    for (let i = 0; i < path.length - 1; i++) {
+      const from = gridCoordinates[path[i]];
+      const to = gridCoordinates[path[i + 1]];
+
+      if (!from || !to) continue;
+
+      const dCol = to.col - from.col;
+      const dRow = to.row - from.row;
+
+      const rowDist = Math.abs(dRow) * unit;
+      const colDist = Math.abs(dCol) * unit;
+
+      if (rowDist >= 20) {
+        console.log("⬆️ Rows:", dRow);
+        await moveInSteps(dRow > 0 ? 'forward' : 'back', rowDist);
+      }
+      if (colDist >= 20) {
+        console.log("➡️ Cols:", dCol);
+        await moveInSteps(dCol > 0 ? 'right' : 'left', colDist);
+      }
     }
 
-    await sendCommand('land');
+    console.log("🛬 Sending 'land'...");
+    await sendCommandSmart('land');
     res.json({ status: 'OK' });
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: 'Failed to send commands' });
+    console.error("❌ Flight failed:", err);
+    res.status(500).json({ error: 'Failed to send flight path' });
   }
 });
 
 module.exports = router;
+
+
+
+
+

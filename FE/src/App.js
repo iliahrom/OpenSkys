@@ -91,7 +91,9 @@ function App() {
           />
           <Route
             path="/flight-points"
-            element={user ? <FlightPoints /> : <Navigate to="/login" />}
+            element={
+              user ? <FlightPoints user={user} /> : <Navigate to="/login" />
+            }
           />
 
           {/* ✅ Authentication Routes (Redirect if user is already logged in) */}
