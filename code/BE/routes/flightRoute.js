@@ -1,7 +1,7 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
-const dgram = require('dgram');
-const client = dgram.createSocket('udp4');
+const dgram = require("dgram");
+const client = dgram.createSocket("udp4");
 
 const gridCoordinates = {
   A: { col: 0, row: 0 },
@@ -36,7 +36,7 @@ const sendCommandSmart = (cmd) => {
     }
 
     console.log("📡 Sending:", cmd, "| Delay:", delayMs);
-    client.send(cmd, 0, cmd.length, 8889, '192.168.10.1', () => {
+    client.send(cmd, 0, cmd.length, 8889, "192.168.10.1", () => {
       setTimeout(resolve, delayMs);
     });
   });
@@ -52,20 +52,22 @@ const moveInSteps = async (direction, distance) => {
   }
 };
 
-router.post('/', async (req, res) => {
+router.post("/", async (req, res) => {
   const { path } = req.body;
   if (!Array.isArray(path) || path.length < 2) {
-    return res.status(400).json({ error: 'Path must contain at least two points' });
+    return res
+      .status(400)
+      .json({ error: "Path must contain at least two points" });
   }
 
   const unit = 100;
 
   try {
     console.log("🔁 Sending 'command'...");
-    await sendCommandSmart('command');
+    await sendCommandSmart("command");
 
     console.log("🛫 Sending 'takeoff'...");
-    await sendCommandSmart('takeoff');
+    await sendCommandSmart("takeoff");
 
     console.log("⏳ Stabilizing...");
     await delay(5000);
@@ -84,26 +86,21 @@ router.post('/', async (req, res) => {
 
       if (rowDist >= 20) {
         console.log("⬆️ Rows:", dRow);
-        await moveInSteps(dRow > 0 ? 'forward' : 'back', rowDist);
+        await moveInSteps(dRow > 0 ? "forward" : "back", rowDist);
       }
       if (colDist >= 20) {
         console.log("➡️ Cols:", dCol);
-        await moveInSteps(dCol > 0 ? 'right' : 'left', colDist);
+        await moveInSteps(dCol > 0 ? "right" : "left", colDist);
       }
     }
 
     console.log("🛬 Sending 'land'...");
-    await sendCommandSmart('land');
-    res.json({ status: 'OK' });
+    await sendCommandSmart("land");
+    res.json({ status: "OK" });
   } catch (err) {
     console.error("❌ Flight failed:", err);
-    res.status(500).json({ error: 'Failed to send flight path' });
+    res.status(500).json({ error: "Failed to send flight path" });
   }
 });
 
 module.exports = router;
-
-
-
-
-

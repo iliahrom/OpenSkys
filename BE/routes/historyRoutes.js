@@ -5,11 +5,13 @@ const db = require("../dbSingleton").getConnection(); // ✅ get the real connec
 // Save a flight
 router.post("/save", async (req, res) => {
   const { user_id, path_name, points } = req.body;
+  console.log("Saving flight history:", { user_id, path_name, points }); // ✅ Add this
+
   if (!user_id || !points)
     return res.status(400).json({ error: "Missing data" });
 
   try {
-    await db.execute(
+    await db.query(
       `INSERT INTO flight_history (user_id, path_name, points) VALUES (?, ?, ?)`,
       [user_id, path_name || "", points.join(",")]
     );
@@ -37,48 +39,51 @@ router.get("/latest", async (req, res) => {
   }
 });
 
-// Download full history as CSV
-// 🚀 Download full flight history as CSV (callback-style for mysql)
+/// 🚀 Download full flight history as CSV with username
 router.get("/download", (req, res) => {
   const { user_id } = req.query;
   if (!user_id) {
     return res.status(400).json({ error: "Missing user_id" });
   }
 
-  db.query(
-    `SELECT * FROM flight_history WHERE user_id = ?`,
-    [user_id],
-    (err, rows) => {
-      if (err) {
-        console.error("❌ CSV Download error:", err);
-        return res.status(500).json({ error: "CSV generation failed" });
-      }
+  const query = `
+    SELECT f.id, f.user_id, u.username, f.path_name, f.points, f.timestamp
+    FROM flight_history f
+    JOIN users u ON f.user_id = u.id
+    WHERE f.user_id = ?
+  `;
 
-      if (!rows.length) {
-        return res.status(404).json({ error: "No history found" });
-      }
-
-      const csv = [
-        ["id", "user_id", "path_name", "points", "timestamp"],
-        ...rows.map((row) => [
-          row.id,
-          row.user_id,
-          `"${row.path_name}"`,
-          `"${row.points}"`,
-          row.timestamp,
-        ]),
-      ]
-        .map((r) => r.join(","))
-        .join("\n");
-
-      res.setHeader(
-        "Content-Disposition",
-        "attachment; filename=flight_history.csv"
-      );
-      res.setHeader("Content-Type", "text/csv");
-      res.send(csv);
+  db.query(query, [user_id], (err, rows) => {
+    if (err) {
+      console.error("❌ CSV Download error:", err);
+      return res.status(500).json({ error: "CSV generation failed" });
     }
-  );
+
+    if (!rows.length) {
+      return res.status(404).json({ error: "No history found" });
+    }
+
+    const csv = [
+      ["id", "username", "path_name", "points", "timestamp"], // headers
+      ...rows.map((row) => [
+        row.id,
+
+        row.username,
+        `"${row.path_name}"`,
+        `"${row.points}"`,
+        row.timestamp,
+      ]),
+    ]
+      .map((r) => r.join(","))
+      .join("\n");
+
+    res.setHeader(
+      "Content-Disposition",
+      "attachment; filename=flight_history.csv"
+    );
+    res.setHeader("Content-Type", "text/csv");
+    res.send(csv);
+  });
 });
 
 module.exports = router;

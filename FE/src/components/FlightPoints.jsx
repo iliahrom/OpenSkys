@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, useCallback } from "react";
 import axios from "axios";
 import styles from "../styles/flight.module.css";
 import droneIcon from "../assets/drone.png";
@@ -10,6 +10,7 @@ const FlightPoints = ({ user }) => {
   const [selectedWifi, setSelectedWifi] = useState("");
   const [lines, setLines] = useState([]);
   const [pathName, setPathName] = useState("");
+  const [batteryLevel, setBatteryLevel] = useState(100);
   const [savedPaths, setSavedPaths] = useState([]);
   const [selectedSavedPathId, setSelectedSavedPathId] = useState(null);
 
@@ -65,6 +66,17 @@ const FlightPoints = ({ user }) => {
     connectToWifi(ssid);
   };
 
+  const getBatteryLevel = useCallback(async () => {
+    try {
+      const result = await axios.get(
+        "http://localhost:5000/api/flight/battery"
+      );
+      return result.data.batteryLevel || "0";
+    } catch (err) {
+      console.error("❌ Failed to get battery level", err);
+    }
+  }, []);
+
   const connectToWifi = async (ssid) => {
     try {
       await axios.post("http://localhost:5000/api/wifi/connect", { ssid });
@@ -77,19 +89,18 @@ const FlightPoints = ({ user }) => {
     if (selectedPoints.length < 2 || !user?.id) return;
 
     try {
-      // Send flight path to drone
+      console.log("📤 Sending path to drone:", selectedPoints);
+
       await axios.post("http://localhost:5000/api/flight", {
         path: selectedPoints,
       });
 
-      // Save the flight to history
       await axios.post("http://localhost:5000/api/flight/history/save", {
         user_id: user.id,
         path_name: pathName || "Unnamed Path",
         points: selectedPoints,
       });
 
-      // Animate drone movement
       animateFlight(selectedPoints);
     } catch (err) {
       console.error("❌ Failed sending to drone or saving history", err);
@@ -134,6 +145,11 @@ const FlightPoints = ({ user }) => {
   const getXY = (el) => {
     const box = el.getBoundingClientRect();
     const containerBox = containerRef.current.getBoundingClientRect();
+    console.log("📍 getXY", {
+      label: el?.innerText,
+      box: el.getBoundingClientRect(),
+      container: containerRef.current?.getBoundingClientRect(),
+    });
     return {
       x: box.left - containerBox.left + box.width / 2,
       y: box.top - containerBox.top + box.height / 2,
@@ -183,6 +199,9 @@ const FlightPoints = ({ user }) => {
       const from = getXY(fromEl);
       const to = getXY(toEl);
       flightLines.push({ x1: from.x, y1: from.y, x2: to.x, y2: to.y });
+      console.log(
+        `🟢 Flying from ${pointNames[i - 1] || "BASE"} to ${pointNames[i]}`
+      );
       await moveDrone(fromEl, toEl);
     }
 
@@ -194,11 +213,22 @@ const FlightPoints = ({ user }) => {
       x2: basePos.x,
       y2: basePos.y,
     });
+    console.log(`🔵 Returning to BASE`);
     await moveDrone(lastEl, base);
 
     setLines(flightLines);
     setTimeout(() => setLines([]), 5000);
   };
+
+  useEffect(() => {
+    let fetcher = setInterval(async () => {
+      const level = await getBatteryLevel();
+      setBatteryLevel(level);
+    }, 1000);
+    return () => {
+      clearInterval(fetcher);
+    };
+  }, [getBatteryLevel, setBatteryLevel]);
 
   return (
     <div className={styles.container} ref={containerRef}>
@@ -226,7 +256,7 @@ const FlightPoints = ({ user }) => {
         <button className={styles.base} ref={baseRef}>
           Base
         </button>
-        {[0, 1, 2].map((rowVal) => (
+        {[0, 1, 2, 3].map((rowVal) => (
           <div key={rowVal} className={styles.gridRow}>
             {points
               .filter((p) => p.row === rowVal)
@@ -283,6 +313,12 @@ const FlightPoints = ({ user }) => {
             }}
           />
         )}
+
+        <div className={styles.batteryLevel}>
+          Battery Level
+          <br />
+          {batteryLevel}%
+        </div>
       </div>
 
       <div className={styles.controls}>
@@ -290,7 +326,7 @@ const FlightPoints = ({ user }) => {
           className={styles.downloadButton}
           onClick={() =>
             window.open(
-              `http://localhost:5000/api/flight/history/download?user_id=23`,
+              `http://localhost:5000/api/flight/history/download?user_id=${user.id}`,
               "_blank"
             )
           }

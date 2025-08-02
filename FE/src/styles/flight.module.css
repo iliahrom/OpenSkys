@@ -22,6 +22,7 @@
   flex-direction: column;
   gap: 10px;
   align-items: center;
+  position: relative;
 }
 
 .gridRow {
@@ -152,4 +153,45 @@ button:hover {
 
 .downloadButton:hover {
   background-color: #218838;
+}
+.toast {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: #333;
+  color: white;
+  padding: 12px 20px;
+  border-radius: 6px;
+  font-size: 14px;
+  z-index: 9999;
+  opacity: 0.95;
+  animation: fadeInOut 3s ease-in-out forwards;
+}
+
+@keyframes fadeInOut {
+  0% {
+    opacity: 0;
+    transform: translateX(-50%) translateY(20px);
+  }
+  10% {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+  90% {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+  100% {
+    opacity: 0;
+    transform: translateX(-50%) translateY(20px);
+  }
+}
+
+.batteryLevel {
+  position: absolute;
+  top: 12rem;
+  right: 5rem;
+  color: red;
+  font-weight: bold;
 }
