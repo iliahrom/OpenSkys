@@ -4,6 +4,7 @@
   padding-top: 80px;
   background-color: #1d2c2c;
   min-height: 100vh;
+  position: relative;
 }
 
 .title {
@@ -55,13 +56,28 @@
 
 .base {
   background-color: #005a6e;
+  display: flex;
   font-size: 28px;
   margin-bottom: 30px;
   color: white;
   padding: 15px 30px;
   border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
+.basePoint{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-weight: bold;
+  font-size: 16px;
+  padding: 0;
+  margin: 0;
+  text-align: center;
+  line-height: normal;
 
+}
 /* כפתורים ושדות */
 .controls {
   display: flex;
@@ -190,8 +206,72 @@ button:hover {
 
 .batteryLevel {
   position: absolute;
-  top: 12rem;
-  right: 5rem;
-  color: red;
+  right: 20px;
+  top: 100px;
+  font-size: 1.2rem;
   font-weight: bold;
+  color: limegreen; /* Or gradient if you prefer */
+  background-color: #222;
+  padding: 6px 12px;
+  border-radius: 10px;
 }
+.visitedPoint {
+  background-color: yellow !important;
+}
+.adminInfo {
+  margin: 10px 0;
+  padding: 8px 12px;
+  background-color: #222;
+  color: #00e6ff;
+  border: 1px solid #00e6ff;
+  border-radius: 6px;
+  font-weight: bold;
+  text-align: center;
+}
+.stepSizeControls {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.stepSizeControls input {
+  width: 180px;
+  padding: 6px;
+  border-radius: 5px;
+  border: 1px solid #00e6ff;
+  background: #111;
+  color: white;
+  text-align: center;
+}
+
+.stepSizeControls button {
+  background-color: #008cba;
+  border: none;
+  color: white;
+  padding: 6px 12px;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.stepSizeControls button:hover {
+  background-color: #0074a1;
+}
+
+.stepSizeBox {
+  margin-top: 15px;
+  background-color: rgba(0, 0, 0, 0.3);
+  color: #00e6ff;
+  border: 1px solid #00e6ff;
+  border-radius: 8px;
+  padding: 10px 20px;
+  width: fit-content;
+  margin-left: auto;
+  margin-right: auto;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+

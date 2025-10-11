@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import styles from "../styles/Register.module.css";
-import backgroundImage from "../assets/drone-register-bg.jpg"; // ייבוא התמונה
+import backgroundImage from "../assets/drone-register-bg.jpg";
 
 const Register = () => {
   const [formData, setFormData] = useState({

@@ -10,7 +10,7 @@ const SavedPaths = ({ onLoadPath }) => {
       const res = await axios.get("http://localhost:5000/api/paths");
       setPaths(res.data);
     } catch (err) {
-      console.error("❌ Failed to fetch saved paths", err);
+      console.error("Failed to fetch saved paths", err);
     }
   };
 

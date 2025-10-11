@@ -1,6 +1,6 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import styles from "../styles/Navbar.module.css"; // ✅ Import Navbar styles
+import styles from "../styles/Navbar.module.css"; //Import Navbar styles
 
 const Navbar = ({ user, handleLogout }) => {
   return (
@@ -25,7 +25,7 @@ const Navbar = ({ user, handleLogout }) => {
       <div className={styles.rightSide}>
         {user && (
           <div style={{ display: "flex", alignItems: "center", gap: "20px" }}>
-            {/* ✅ New Profile Link */}
+            {/*New Profile Link */}
             <Link to="/profile" className={styles.profileLink}>
               Profile
             </Link>

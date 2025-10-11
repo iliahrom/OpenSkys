@@ -32,7 +32,7 @@ const ManageUsers = () => {
 
   const handleSave = async (e) => {
     e.preventDefault();
-    setSaving(true); // 🔵 Start saving
+    setSaving(true); //Start saving
     try {
       await axios.post(
         `http://localhost:3000/api/auth/users/${userToEdit.id}`,
@@ -48,7 +48,7 @@ const ManageUsers = () => {
       );
       alert("Failed to update user.");
     } finally {
-      setSaving(false); // 🔵 End saving
+      setSaving(false); //End saving
     }
   };
 
@@ -68,7 +68,7 @@ const ManageUsers = () => {
         <thead>
           <tr>
             <th>Full Name</th>
-            <th>ID Number</th> {/* ✅ changed header */}
+            <th>ID Number</th> {/*changed header */}
             <th>Username</th>
             <th>Email</th>
             <th>Phone</th>

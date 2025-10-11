@@ -1,7 +1,6 @@
-import React, { useState, useEffect } from "react"; // ✅ Importing React and hooks
-import styles from "../styles/About.module.css"; // ✅ Importing CSS module for styling
+import React, { useState, useEffect } from "react";
+import styles from "../styles/About.module.css";
 
-// ✅ Array of drone images used in the gallery section
 const images = [
   "/assets/drone1.jpg",
   "/assets/drone2.jpg",
@@ -9,74 +8,75 @@ const images = [
 ];
 
 const About = () => {
-  // ✅ State to track the current image index in the gallery
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
-  // ✅ `useEffect` to automatically cycle through images every 3 seconds
   useEffect(() => {
     const interval = setInterval(() => {
-      setCurrentImageIndex((prevIndex) => (prevIndex + 1) % images.length);
+      setCurrentImageIndex((prev) => (prev + 1) % images.length);
     }, 3000);
-
-    return () => clearInterval(interval); // ✅ Cleanup function to prevent memory leaks
+    return () => clearInterval(interval);
   }, []);
 
   return (
     <div className={styles.aboutWrapper}>
-      {" "}
-      {/* ✅ Main wrapper for the about section */}
-      <div className={styles.container}>
-        {" "}
-        {/* ✅ Container for all content */}
-        <h1>About Us</h1>
-        <p>
-          {/* ✅ Brief introduction about the drone project */}
-          Welcome to our drone project! Our goal is to provide an interactive
-          platform that visualizes how drones fly from one point to another.
+      <section className={styles.heroSection}>
+        <h1 className={styles.mainTitle}>About OpenSkys</h1>
+        <p className={styles.subtitle}>
+          Advanced Drone Management & Flight Visualization Platform
         </p>
+      </section>
+
+      <section className={styles.missionSection}>
         <h2>Our Mission</h2>
         <p>
-          {/* ✅ Explanation of the project's purpose */}
-          We strive to make drone technology accessible and easy to understand.
-          Our project helps users explore various drone applications, flight
-          paths, and real-time drone tracking.
+          OpenSkys bridges the gap between simulation and real-world drone
+          operation. Our mission is to empower developers, pilots, and engineers
+          with a clear, visual, and data-driven approach to drone navigation and
+          control.
         </p>
-        <h2>Why Choose Us?</h2>
-        {/* ✅ List of key features that make the project unique */}
-        <ul>
-          <li> Interactive visualizations of drone movements</li>
-          <li> Real-time drone tracking capabilities</li>
-          <li> Educational resources about different drone types</li>
-          <li> User-friendly interface with a modern design</li>
-        </ul>
-        <h2>Meet the Team</h2>
-        <div className={styles.teamContainer}>
-          {" "}
-          {/* ✅ Section for the team members */}
-          <div className={styles.teamCard}>
-            <img
-              src="/assets/developer.jpg"
-              alt="Developer"
-              className={styles.teamImage}
-            />
-            <h3>Bar Pahima and Ilia Hromchenko</h3>
-            <p>Softwares Engineeres & Drone Enthusiast</p>
+      </section>
+
+      <section className={styles.featuresSection}>
+        <h2>Main Features</h2>
+        <div className={styles.featuresGrid}>
+          <div className={styles.featureCard}>
+            <i className="fas fa-route"></i>
+            <h3>Route Visualization</h3>
+            <p>Define, simulate, and monitor drone paths in real time.</p>
+          </div>
+          <div className={styles.featureCard}>
+            <i className="fas fa-battery-half"></i>
+            <h3>Live Telemetry</h3>
+            <p>Track battery, altitude, and position updates instantly.</p>
+          </div>
+          <div className={styles.featureCard}>
+            <i className="fas fa-user-shield"></i>
+            <h3>Role-based Access</h3>
+            <p>Admin and user dashboards for full control and safety.</p>
           </div>
         </div>
+      </section>
+
+      <section className={styles.teamSection}>
+        <h2>Developed by</h2>
+        <div className={styles.teamCard}>
+          <h3>Bar Pahima & Ilia Hromchenko</h3>
+          <p>Software Engineers & Drone Enthusiasts</p>
+        </div>
+      </section>
+
+      <section className={styles.gallerySection}>
         <h2>Gallery</h2>
-        <div className={styles.gallery}>
-          {" "}
-          {/* ✅ Displays the changing drone images */}
+        <div className={styles.galleryFrame}>
           <img
-            src={images[currentImageIndex]} // ✅ Cycles through the images every 3 seconds
+            src={images[currentImageIndex]}
             alt="Drone"
-            className={styles.animatedImage}
-            style={{ width: "30%", height: "auto" }} // ✅ Adjusts the image size dynamically
+            className={styles.galleryImage}
           />
         </div>
-      </div>
+      </section>
     </div>
   );
 };
 
-export default About; // ✅ Exporting the About component to be used in the project
+export default About;

@@ -11,7 +11,7 @@ function Details({ existingDrone = null, onClose = null }) {
     range_km: "",
     description: "",
   });
-  const [saving, setSaving] = useState(false); // ✅ Saving State
+  const [saving, setSaving] = useState(false); //Saving State
 
   useEffect(() => {
     if (existingDrone) {
@@ -49,7 +49,7 @@ function Details({ existingDrone = null, onClose = null }) {
       );
       alert("Failed to update drone.");
     } finally {
-      setSaving(false); // 🔵 End Saving
+      setSaving(false); 
     }
   };
 
@@ -75,7 +75,7 @@ function Details({ existingDrone = null, onClose = null }) {
 
   return (
     <div className={styles.container}>
-      {/* ✅ Title and Delete Button for full page only */}
+      {/*Title and Delete Button for full page only */}
       {!onClose && (
         <>
           <h2>Drones Management</h2>
@@ -92,7 +92,7 @@ function Details({ existingDrone = null, onClose = null }) {
         </>
       )}
 
-      {/* ✅ Edit Form */}
+      {/*Edit Form */}
       <form className={styles.form} onSubmit={saveChanges}>
         <input
           type="text"
@@ -138,12 +138,12 @@ function Details({ existingDrone = null, onClose = null }) {
           }
         />
 
-        {/* ✅ Save Button with Saving... State */}
+        {/*Save Button with Saving... State */}
         <button className={styles.saveButton} type="submit" disabled={saving}>
           {saving ? "Saving..." : "Save"}
         </button>
 
-        {/* ✅ Cancel Button if in popup */}
+        {/*Cancel Button if in popup */}
         {onClose && (
           <button
             className={styles.cancelButton}

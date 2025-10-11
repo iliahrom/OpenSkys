@@ -1,8 +1,8 @@
   import React, { useEffect, useState } from "react";
   import axios from "axios";
   import styles from "../styles/ManageDrones.module.css";
-  import AddDrone from "./AddDrone"; // ✅ Add Drone Form
-  import Details from "./Details"; // ✅ Edit Drone Form
+  import AddDrone from "./AddDrone"; //Add Drone Form
+  import Details from "./Details"; // Edit Drone Form
 
   const ManageDrones = () => {
     const [drones, setDrones] = useState([]);
@@ -105,7 +105,7 @@
         {showForm && (
           <div className={styles.addFormWrapper}>
             {droneToEdit ? (
-              // ✅ If we are editing a drone -> show Details
+              //If we are editing a drone -show Details
               <Details
                 existingDrone={droneToEdit}
                 onClose={() => {
@@ -114,7 +114,7 @@
                 }}
               />
             ) : (
-              // ✅ If we are adding new -> show AddDrone
+              //If we are adding new -show AddDrone
               <AddDrone
                 onClose={() => {
                   setShowForm(false);

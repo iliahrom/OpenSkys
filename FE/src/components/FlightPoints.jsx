@@ -13,16 +13,41 @@ const FlightPoints = ({ user }) => {
   const [batteryLevel, setBatteryLevel] = useState(100);
   const [savedPaths, setSavedPaths] = useState([]);
   const [selectedSavedPathId, setSelectedSavedPathId] = useState(null);
+  const [droneVisible, setDroneVisible] = useState(false);
+  const [visitedPoints, setVisitedPoints] = useState([]);
+  const [flightToAnimate, setFlightToAnimate] = useState(null);
+  const [stepSize, setStepSize] = useState(null);
+  const [newStepSize, setNewStepSize] = useState("");
+
+
 
   const pointRefs = useRef({});
   const droneRef = useRef(null);
   const containerRef = useRef(null);
   const baseRef = useRef(null);
 
+  const flyToPoint = (drone, point, container, callback) => {
+    const droneRect = drone.getBoundingClientRect();
+    const pointRect = point.getBoundingClientRect();
+    const containerRect = container.getBoundingClientRect();
+
+    const offsetX = pointRect.left - containerRect.left;
+    const offsetY = pointRect.top - containerRect.top;
+
+    drone.style.transition = "left 1s linear, top 1s linear";
+    drone.style.left = `${offsetX}px`;
+    drone.style.top = `${offsetY}px`;
+
+    setTimeout(() => {
+      callback();
+    }, 1000); // Match duration with CSS
+  };
+
   useEffect(() => {
     fetchWifiNetworks();
     fetchPointsFromDB();
     fetchSavedPaths();
+    fetchStepSize();
   }, []);
 
   const fetchPointsFromDB = async () => {
@@ -30,7 +55,7 @@ const FlightPoints = ({ user }) => {
       const res = await axios.get("http://localhost:5000/api/points");
       setPoints(res.data);
     } catch (err) {
-      console.error("❌ Failed to fetch points from DB:", err);
+      console.error("Failed to fetch points from DB:", err);
     }
   };
 
@@ -39,7 +64,7 @@ const FlightPoints = ({ user }) => {
       const res = await axios.get("http://localhost:5000/api/wifi");
       setWifiList(res.data.networks);
     } catch (err) {
-      console.error("❌ Failed to fetch WiFi networks", err);
+      console.error("Failed to fetch WiFi networks", err);
     }
   };
 
@@ -48,7 +73,15 @@ const FlightPoints = ({ user }) => {
       const res = await axios.get("http://localhost:5000/api/paths");
       setSavedPaths(res.data);
     } catch (err) {
-      console.error("❌ Failed to fetch saved paths:", err);
+      console.error("Failed to fetch saved paths:", err);
+    }
+  };
+  const fetchStepSize = async () => {
+    try {
+      const res = await axios.get("http://localhost:5000/api/flight/step-size");
+      setStepSize(res.data.stepSizeInCm);
+    } catch (err) {
+      console.error("Failed to fetch step size:", err);
     }
   };
 
@@ -73,15 +106,24 @@ const FlightPoints = ({ user }) => {
       );
       return result.data.batteryLevel || "0";
     } catch (err) {
-      console.error("❌ Failed to get battery level", err);
+      console.error("Failed to get battery level", err);
     }
   }, []);
 
   const connectToWifi = async (ssid) => {
     try {
       await axios.post("http://localhost:5000/api/wifi/connect", { ssid });
+      await handleDroneConnect();
     } catch (err) {
-      console.error("❌ Failed to connect to WiFi", err);
+      console.error("Failed to connect to WiFi", err);
+    }
+  };
+  const handleDroneConnect = async () => {
+    try {
+      await axios.post("/api/drone/connect");
+      setBatteryLevel(100); // default battery level 100%
+    } catch (err) {
+      console.error("Failed to connect to drone", err);
     }
   };
 
@@ -89,21 +131,28 @@ const FlightPoints = ({ user }) => {
     if (selectedPoints.length < 2 || !user?.id) return;
 
     try {
-      console.log("📤 Sending path to drone:", selectedPoints);
+      console.log("Sending path to drone:", selectedPoints);
+      console.log("Refs:", {
+        drone: droneRef.current,
+        container: containerRef.current,
+        base: baseRef.current,
+      });
 
       await axios.post("http://localhost:5000/api/flight", {
         path: selectedPoints,
       });
+
+
 
       await axios.post("http://localhost:5000/api/flight/history/save", {
         user_id: user.id,
         path_name: pathName || "Unnamed Path",
         points: selectedPoints,
       });
+      setDroneVisible(true);
 
-      animateFlight(selectedPoints);
     } catch (err) {
-      console.error("❌ Failed sending to drone or saving history", err);
+      console.error("Failed sending to drone or saving history", err);
     }
   };
 
@@ -115,12 +164,12 @@ const FlightPoints = ({ user }) => {
         name: pathName,
         points: selectedPoints,
       });
-      alert("✅ Path saved successfully!");
+      alert("Path saved successfully!");
       setPathName("");
       fetchSavedPaths();
     } catch (err) {
-      console.error("❌ Failed to save path:", err);
-      alert("❌ Failed to save path");
+      console.error("Failed to save path:", err);
+      alert("Failed to save path");
     }
   };
 
@@ -132,7 +181,7 @@ const FlightPoints = ({ user }) => {
     if (selected) {
       const pointList = selected.points;
       setSelectedPoints(pointList);
-      animateFlight(pointList);
+      setTimeout(() => animateFlight(pointList), 100);
     }
   };
 
@@ -140,20 +189,17 @@ const FlightPoints = ({ user }) => {
     setSelectedPoints([]);
     setLines([]);
     setPathName("");
+    setVisitedPoints([]);
   };
 
   const getXY = (el) => {
-    const box = el.getBoundingClientRect();
-    const containerBox = containerRef.current.getBoundingClientRect();
-    console.log("📍 getXY", {
-      label: el?.innerText,
-      box: el.getBoundingClientRect(),
-      container: containerRef.current?.getBoundingClientRect(),
-    });
-    return {
-      x: box.left - containerBox.left + box.width / 2,
-      y: box.top - containerBox.top + box.height / 2,
-    };
+    if (!el || !containerRef.current) return { x: 0, y: 0 };
+
+    // const container = containerRef.current;
+    const x = el.offsetLeft + el.offsetWidth / 2;
+    const y = el.offsetTop + el.offsetHeight / 2;
+
+    return { x, y };
   };
 
   const moveDrone = async (fromEl, toEl) => {
@@ -181,14 +227,25 @@ const FlightPoints = ({ user }) => {
     });
   };
 
-  const animateFlight = async (pointNames) => {
+  const animateFlight = async (pointNames, live = false) => {
     if (!droneRef.current || !containerRef.current || !baseRef.current) return;
-
+    if (live) await new Promise((resolve) => setTimeout(resolve, 12000));
+    setDroneVisible(true);
+    // const startEl = baseRef.current;
+    // const startRect = startEl.getBoundingClientRect();
+    // const containerRect = containerRef.current.getBoundingClientRect();
+    // droneRef.current.style.left = `${startRect.left - containerRect.left}px`;
+    // droneRef.current.style.top = `${startRect.top - containerRect.top}px`;
     const drone = droneRef.current;
     const base = baseRef.current;
     const basePos = getXY(base);
     drone.style.left = `${basePos.x - 30}px`;
     drone.style.top = `${basePos.y - 30}px`;
+    console.log("Starting animation with points:", pointNames);
+    console.log("Visited so far:", visitedPoints);
+    console.log("Drone:", droneRef.current);
+    console.log("Container:", containerRef.current);
+    console.log("BASE:", baseRef.current);
 
     const flightLines = [];
 
@@ -196,25 +253,34 @@ const FlightPoints = ({ user }) => {
       const fromEl = i === 0 ? base : pointRefs.current[pointNames[i - 1]];
       const toEl = pointRefs.current[pointNames[i]];
       if (!fromEl || !toEl) continue;
+
       const from = getXY(fromEl);
       const to = getXY(toEl);
       flightLines.push({ x1: from.x, y1: from.y, x2: to.x, y2: to.y });
       console.log(
-        `🟢 Flying from ${pointNames[i - 1] || "BASE"} to ${pointNames[i]}`
+        `Flying from ${pointNames[i - 1] || "BASE"} to ${pointNames[i]}`
       );
       await moveDrone(fromEl, toEl);
+      setVisitedPoints((prev) =>
+        prev.includes(pointNames[i]) ? prev : [...prev, pointNames[i]]
+      );
+      if (live) await new Promise((resolve) => setTimeout(resolve, 3000));
     }
-
+    // Return to BASE at end
     const lastEl = pointRefs.current[pointNames[pointNames.length - 1]];
-    const lastPos = getXY(lastEl);
-    flightLines.push({
-      x1: lastPos.x,
-      y1: lastPos.y,
-      x2: basePos.x,
-      y2: basePos.y,
-    });
-    console.log(`🔵 Returning to BASE`);
-    await moveDrone(lastEl, base);
+
+    if (lastEl) {
+      const lastPos = getXY(lastEl);
+      flightLines.push({
+        x1: lastPos.x,
+        y1: lastPos.y,
+        x2: basePos.x,
+        y2: basePos.y,
+      });
+
+      console.log(` Returning to BASE`);
+      await moveDrone(lastEl, base);
+    }
 
     setLines(flightLines);
     setTimeout(() => setLines([]), 5000);
@@ -223,12 +289,43 @@ const FlightPoints = ({ user }) => {
   useEffect(() => {
     let fetcher = setInterval(async () => {
       const level = await getBatteryLevel();
-      setBatteryLevel(level);
+
+      if (level === null || level === undefined) {
+        setBatteryLevel(100);
+      } else {
+        const normalizedLevel = parseInt(level);
+        if (
+          isNaN(normalizedLevel) ||
+          normalizedLevel < 0 ||
+          normalizedLevel > 100
+        ) {
+          setBatteryLevel(100);
+        } else {
+          setBatteryLevel(normalizedLevel);
+        }
+      }
     }, 1000);
+
     return () => {
       clearInterval(fetcher);
     };
-  }, [getBatteryLevel, setBatteryLevel]);
+  }, [getBatteryLevel]);
+
+  useEffect(() => {
+    if (flightToAnimate && flightToAnimate.length > 0) {
+      const allRefsReady = flightToAnimate.every((p) => pointRefs.current[p]);
+      if (allRefsReady) {
+        animateFlight(flightToAnimate);
+        setFlightToAnimate(null);
+      } else {
+        const retryTimeout = setTimeout(() => {
+          setFlightToAnimate([...flightToAnimate]);
+        }, 100);
+        return () => clearTimeout(retryTimeout);
+      }
+    }
+  }, [flightToAnimate]);
+
 
   return (
     <div className={styles.container} ref={containerRef}>
@@ -253,9 +350,6 @@ const FlightPoints = ({ user }) => {
       </select>
 
       <div className={styles.grid}>
-        <button className={styles.base} ref={baseRef}>
-          Base
-        </button>
         {[0, 1, 2, 3].map((rowVal) => (
           <div key={rowVal} className={styles.gridRow}>
             {points
@@ -264,9 +358,17 @@ const FlightPoints = ({ user }) => {
               .map((point) => (
                 <button
                   key={point.id}
-                  ref={(el) => (pointRefs.current[point.name] = el)}
+                  ref={(el) => {
+                    pointRefs.current[point.name] = el;
+                    if (point.name === "BASE") baseRef.current = el;
+                  }}
                   className={`${styles.point} ${
-                    selectedPoints.includes(point.name) ? styles.start : ""
+                    point.name === "BASE" ? styles.basePoint : ""
+                  } ${selectedPoints.includes(point.name) ? styles.start : ""}
+                  ${
+                    visitedPoints.includes(point.name)
+                      ? styles.visitedPoint
+                      : ""
                   }`}
                   onClick={() => handlePointClick(point.name)}
                 >
@@ -310,29 +412,87 @@ const FlightPoints = ({ user }) => {
               left: 0,
               top: 0,
               zIndex: 1000,
+              display: droneVisible ? "block" : "none",
             }}
           />
         )}
 
-        <div className={styles.batteryLevel}>
-          Battery Level
-          <br />
+        <div
+          className={styles.batteryLevel}
+          style={{ color: batteryLevel < 30 ? "red" : "limegreen" }}
+        >
+          Battery Level:
           {batteryLevel}%
         </div>
+        {/* ✅ Step size control - appears centered under the grid */}
+        {user.role === "admin" && (
+          <div className={styles.stepSizeBox}>
+            <strong>Grid Step Size:</strong>{" "}
+            {stepSize ? `${stepSize} cm` : "Loading..."}
+            <div className={styles.stepSizeControls}>
+              <input
+                type="number"
+                min="20"
+                max="500"
+                value={newStepSize}
+                onChange={(e) => setNewStepSize(e.target.value)}
+                placeholder="Set new step size (20–500)"
+              />
+              <button
+                onClick={async () => {
+                  try {
+                    const val = parseInt(newStepSize);
+                    if (isNaN(val) || val < 20 || val > 500) {
+                      alert("Step size must be between 20 and 500 cm");
+                      return;
+                    }
+                    const res = await axios.post(
+                      "http://localhost:5000/api/flight/step-size",
+                      { newStepSize: val }
+                    );
+                    setStepSize(res.data.stepSizeInCm);
+                    setNewStepSize("");
+                    alert("Step size updated successfully!");
+                  } catch (err) {
+                    console.error(err);
+                    alert("Failed to update step size");
+                  }
+                }}
+              >
+                Save Step Size
+              </button>
+            </div>
+          </div>
+        )}
       </div>
 
+
       <div className={styles.controls}>
-        <button
-          className={styles.downloadButton}
-          onClick={() =>
-            window.open(
-              `http://localhost:5000/api/flight/history/download?user_id=${user.id}`,
-              "_blank"
-            )
-          }
-        >
-          Download Flight History as CSV
-        </button>
+        {user?.role === "admin" ? (
+          <button
+            className={styles.downloadButton}
+            onClick={() =>
+              window.open(
+                "http://localhost:5000/api/flight/history/download",
+                "_blank"
+              )
+            }
+          >
+            Download All Flight Histories (Admin)
+          </button>
+        ) : (
+          <button
+            className={styles.downloadButton}
+            onClick={() =>
+              window.open(
+                `http://localhost:5000/api/flight/history/download?user_id=${user.id}`,
+                "_blank"
+              )
+            }
+          >
+            Download My Flight History
+          </button>
+        )}
 
         <input
           type="text"
@@ -342,7 +502,16 @@ const FlightPoints = ({ user }) => {
           className={styles.pathInput}
         />
         <button onClick={savePathToDB}>Save Path</button>
-        <button onClick={sendToDrone}>Start Flight</button>
+        <button
+          onClick={() =>
+            setTimeout(() => {
+              sendToDrone().then(null).catch(null);
+              animateFlight(selectedPoints, true);
+            }, 0)
+          }
+        >
+          Start Flight
+        </button>
         <button onClick={clearPoints}>Clear Points</button>
         <select
           value={selectedSavedPathId || ""}

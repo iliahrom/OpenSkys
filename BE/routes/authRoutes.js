@@ -1,5 +1,5 @@
 const express = require("express");
-const { authMiddleware } = require("../middleware/authMiddleware"); // ✅ Import middleware to protect routes
+const { authMiddleware } = require("../middleware/authMiddleware"); //Import middleware to protect routes
 const db = require("../dbSingleton");
 const bcrypt = require("bcrypt");
 const {
@@ -8,31 +8,31 @@ const {
   logoutUser,
   getCurrentUser,
   getSession,
-} = require("../controllers/authController"); // ✅ Import authentication controllers
+} = require("../controllers/authController"); //Import authentication controllers
 
 const router = express.Router(); // Create an Express router instance
 
-// ✅ Route for user registration
-// 🔹 Calls `registerUser` from `authController.js`
-// 🔹 Used in `POST /api/auth/register`
+//Route for user registration
+// Calls `registerUser` from `authController.js`
+// Used in `POST /api/auth/register`
 router.post("/register", registerUser);
 
-// ✅ Route for user login
-// 🔹 Calls `loginUser` from `authController.js`
-// 🔹 Used in `POST /api/auth/login`
+//Route for user login
+// Calls `loginUser` from `authController.js`
+// Used in `POST /api/auth/login`
 router.post("/login", loginUser);
 
-// ✅ Route for user logout
-// 🔹 Calls `logoutUser` from `authController.js`
-// 🔹 Used in `POST /api/auth/logout`
+//Route for user logout
+// Calls `logoutUser` from `authController.js`
+// Used in `POST /api/auth/logout`
 router.post("/logout", logoutUser);
 
-// ✅ Route to retrieve the currently logged-in user
-// 🔹 Calls `getCurrentUser` from `authController.js`
-// 🔹 Used in `GET /api/auth/session`
-// 🔹 This does **not** require authentication middleware (used to check session state)
+//Route to retrieve the currently logged-in user
+// Calls `getCurrentUser` from `authController.js`
+// Used in `GET /api/auth/session`
+// This does **not** require authentication middleware (used to check session state)
 router.get("/session", getCurrentUser);
-// ✅ Exporting the router to be used in `app.js`
+//Exporting the router to be used in `app.js`
 
 //return the current session user
 router.get("/me", (req, res) => {
@@ -44,7 +44,7 @@ router.get("/me", (req, res) => {
 
 router.get("/users", async (req, res) => {
   try {
-    const connection = db.getConnection(); // ✅ Important: get connection first
+    const connection = db.getConnection(); //Important: get connection first
     const [rows] = await connection
       .promise()
       .query(
@@ -56,7 +56,7 @@ router.get("/users", async (req, res) => {
     res.status(500).json({ error: "Failed to fetch users" });
   }
 });
-// ✅ Route to update a user's details
+//Route to update a user's details
 router.post("/users/:id", async (req, res) => {
   try {
     const {
@@ -96,7 +96,7 @@ router.post("/users/:id", async (req, res) => {
     res.status(500).json({ error: "Failed to update user" });
   }
 });
-// ✅ Profile Update Route
+//Profile Update Route
 router.post("/profile", authMiddleware, async (req, res) => {
   const { email, currentPassword, newPassword } = req.body;
   const userId = req.session.user?.id;
@@ -122,13 +122,13 @@ router.post("/profile", authMiddleware, async (req, res) => {
 
     const user = rows[0];
 
-    // ✅ Verify current password
+    //Verify current password
     const isMatch = await bcrypt.compare(currentPassword, user.password);
     if (!isMatch) {
       return res.status(401).json({ error: "Incorrect current password" });
     }
 
-    // ✅ Update fields
+    //Update fields
     const fields = [];
     const values = [];
 

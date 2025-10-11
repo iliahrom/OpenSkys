@@ -4,10 +4,10 @@ import ManageDrones from "./ManageDrones";
 import ManageUsers from "./ManageUsers"; 
 
 function ControlPanel() {
-  // ✅ State to track which page is selected (users / drones)
+  //State to track which page is selected (users / drones)
   const [activePage, setActivePage] = useState("users");
 
-  // ✅ Handlers to switch between pages
+  //Handlers to switch between pages
   const handlePageChange = (page) => {
     setActivePage(page);
   };
