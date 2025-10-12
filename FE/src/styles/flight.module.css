@@ -1,4 +1,4 @@
-/* מבנה כללי */
+/* main*/
 .container {
   text-align: center;
   padding-top: 80px;
@@ -17,7 +17,7 @@
   margin-bottom: 10px;
 }
 
-/* רשת הנקודות */
+/* grid of points*/
 .grid {
   display: flex;
   flex-direction: column;
@@ -31,9 +31,9 @@
   gap: 10px;
 }
 
-/* נקודות ומצב נבחר */
+/* points and selection*/
 .point {
-  position: relative; /* 👈 ADD THIS */
+  position: relative;
   background-color: #007c91;
   color: white;
   font-size: 18px;
@@ -66,7 +66,7 @@
   align-items: center;
   justify-content: center;
 }
-.basePoint{
+.basePoint {
   display: flex;
   justify-content: center;
   align-items: center;
@@ -76,7 +76,6 @@
   margin: 0;
   text-align: center;
   line-height: normal;
-
 }
 /* כפתורים ושדות */
 .controls {
@@ -115,7 +114,7 @@ button:hover {
   min-width: 200px;
 }
 
-/* עיצוב לרחפן והקוים */
+/* drone icon styling*/
 .droneImage {
   position: absolute;
   width: 60px;
@@ -133,7 +132,7 @@ button:hover {
   z-index: 900;
 }
 
-/* אנימציית רחפן */
+/* drone animation*/
 @keyframes fly {
   from {
     transform: translate(0, 0);
@@ -210,7 +209,7 @@ button:hover {
   top: 100px;
   font-size: 1.2rem;
   font-weight: bold;
-  color: limegreen; /* Or gradient if you prefer */
+  color: limegreen;
   background-color: #222;
   padding: 6px 12px;
   border-radius: 10px;
@@ -274,4 +273,3 @@ button:hover {
   flex-direction: column;
   align-items: center;
 }
-
