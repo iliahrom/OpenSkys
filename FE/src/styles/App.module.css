@@ -1,4 +1,4 @@
-/* מוודא שכל הדפים יקבלו את אותו עיצוב */
+/* basic styling for all pages*/
 .app-container {
   min-height: 100vh;
   display: flex;
@@ -9,7 +9,7 @@
   margin: auto;
 }
 
-/* מונע חיתוכים של תמונת הרקע */
+/* prevents background cutoff */
 body,
 html {
   margin: 0;
@@ -18,7 +18,7 @@ html {
   width: 100%;
 }
 
-/* 📌 ניווט עם רקע זכוכית מטושטשת */
+/* nav with blur glass background */
 .navbar {
   position: fixed;
   top: 0;
@@ -35,10 +35,10 @@ html {
   border-bottom: 1px solid rgba(255, 255, 255, 0.3);
 }
 
-/* 📌 התוכן מתחיל אחרי הניווט כדי שלא ייחתך */
+/* content after the nav to prevent cutoff */
 .mainContent {
   margin-top: 80px;
-  /* מרווח למניעת חיתוך */
+  /* spacing to prevent cutoff */
   padding: 40px;
   max-width: 1200px;
   margin-left: auto;

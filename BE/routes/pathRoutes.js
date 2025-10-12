@@ -2,7 +2,7 @@ const express = require("express");
 const router = express.Router();
 const db = require("../dbSingleton");
 
-// שמירת מסלול חדש
+// saves a new path
 router.post("/", async (req, res) => {
   const { name, points } = req.body;
 
@@ -34,7 +34,7 @@ router.post("/", async (req, res) => {
   }
 });
 
-// שליפת כל המסלולים עם נקודות
+// pulls out all paths with the points
 router.get("/", async (req, res) => {
   try {
     const [paths] = await db

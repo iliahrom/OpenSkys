@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const db = require('../dbSingleton'); // או הנתיב שלך לקובץ החיבור
+const db = require('../dbSingleton'); // connection file
 
 router.get('/', (req, res) => {
   const connection = db.getConnection();
@@ -9,7 +9,7 @@ router.get('/', (req, res) => {
 
   connection.query(sql, (err, results) => {
     if (err) {
-      console.error("❌ Database error:", err);
+      console.error("Database error:", err);
       return res.status(500).json({ error: 'Database error' });
     }
 

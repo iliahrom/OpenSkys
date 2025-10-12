@@ -1,74 +1,110 @@
-/* עיצוב כללי של דף ההרשמה */
+/* main*/
 .container {
   display: flex;
   justify-content: center;
   align-items: center;
   height: 100vh;
- 
+  background: url("../assets/drone-bg.jpg") no-repeat center center;
+  background-size: cover;
+  background-attachment: fixed;
 }
 
+/* reg box */
 .registerBox {
-  background: rgba(255, 255, 255, 0.7);
-  /* רקע שקוף למחצה */
-  padding: 20px;
-  border-radius: 10px;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-  width: 320px;
-  /* הקטנת גודל הטופס */
+  background: rgba(14, 24, 36, 0.7); /* רקע זכוכית כהה */
+  backdrop-filter: blur(14px);
+  padding: 25px;
+  border-radius: 12px;
+  box-shadow: 0 4px 15px rgba(0, 255, 255, 0.15);
+  width: 340px;
   text-align: center;
+  color: #eaf7ff;
+  border: 1px solid rgba(0, 255, 255, 0.1);
 }
 
+/* subject */
 h2 {
-  color: #333;
-  margin-bottom: 15px;
-  font-size: 22px;
+  color: #00d4ff;
+  font-size: 1.8rem;
+  margin-bottom: 20px;
 }
 
+/* input */
 .inputGroup {
-  margin-bottom: 10px;
+  margin-bottom: 15px;
   text-align: left;
 }
 
 .inputGroup label {
   display: block;
   font-weight: bold;
-  margin-bottom: 5px;
-  color: #555;
+  margin-bottom: 6px;
+  color: #00d4ff;
   font-size: 14px;
+  text-shadow: 0 0 6px rgba(0, 212, 255, 0.4);
 }
 
+/* input */
 .inputGroup input {
   width: 100%;
-  padding: 8px;
-  border: 1px solid #ccc;
-  border-radius: 5px;
-  font-size: 14px;
+  padding: 10px;
+  border: 1px solid #1e3a5f;
+  border-radius: 6px;
+  font-size: 15px;
+  background-color: rgba(255, 255, 255, 0.85);
+  color: #000;
+  outline: none;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
 }
 
+.inputGroup input:focus {
+  border-color: #00d4ff;
+  box-shadow: 0 0 6px rgba(0, 212, 255, 0.6);
+}
+
+/* reg button */
 .registerButton {
   width: 100%;
-  padding: 8px;
-  background: #1e3c72;
+  padding: 12px;
+  background: linear-gradient(90deg, #0078ff, #00aaff);
   color: white;
   font-size: 16px;
+  font-weight: bold;
   border: none;
-  border-radius: 5px;
+  border-radius: 6px;
   cursor: pointer;
-  transition: background 0.3s;
+  transition: transform 0.2s ease, background 0.3s ease;
 }
 
 .registerButton:hover {
-  background: #163a5f;
+  background: linear-gradient(90deg, #00aaff, #00e0ff);
+  transform: scale(1.03);
 }
 
+/* "Already have an account?" */
+.loginLink {
+  display: block;
+  margin-top: 15px;
+  color: #00d4ff;
+  text-decoration: none;
+  font-weight: 500;
+  transition: 0.3s;
+}
+
+.loginLink:hover {
+  text-decoration: underline;
+  color: #33f3ff;
+}
+
+/* styling for the error message */
 .error {
-  color: red;
+  color: #ff5555;
   font-weight: bold;
-  font-size: 14px;
+  margin-top: 5px;
 }
 
 .success {
-  color: green;
+  color: #00ffcc;
   font-weight: bold;
-  font-size: 14px;
+  margin-top: 5px;
 }

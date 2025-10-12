@@ -43,57 +43,8 @@ router.get("/latest", async (req, res) => {
   }
 });
 
-// Returns CSV download of full flight history for a user
-// Query param: user_id
-// Output: CSV file with headers: id, username, path_name, points, timestamp
-// router.get("/download", (req, res) => {
-//   const { user_id } = req.query;
-//   //Validation
-//   if (!user_id) {
-//     return res.status(400).json({ error: "Missing user_id" });
-//   }
-
-//   const query = `
-//     SELECT f.id, f.user_id, u.username, f.path_name, f.points, f.timestamp
-//     FROM flight_history f
-//     JOIN users u ON f.user_id = u.id
-//     WHERE f.user_id = ?
-//   `;
-
-//   db.query(query, [user_id], (err, rows) => {
-//     if (err) {
-//       console.error("CSV Download error:", err);
-//       return res.status(500).json({ error: "CSV generation failed" });
-//     }
-
-//     if (!rows.length) {
-//       return res.status(404).json({ error: "No history found" });
-//     }
-
-//     const csv = [
-//       ["id", "username", "path_name", "points", "timestamp"], // headers row
-//       ...rows.map((row) => [
-//         row.id,
-
-//         row.username,
-//         `"${row.path_name}"`,
-//         `"${row.points}"`,
-//         row.timestamp,
-//       ]),
-//     ]
-//       .map((r) => r.join(","))
-//       .join("\n");
-
-//     res.setHeader(
-//       "Content-Disposition",
-//       "attachment; filename=flight_history.csv"
-//     );
-//     res.setHeader("Content-Type", "text/csv");
-//     res.send(csv);
-//   });
-// });
 router.get("/download", (req, res) => {
-  const user = req.session.user; // 🔹 נקבל את המשתמש המחובר מתוך הסשן
+  const user = req.session.user; // get the connected user from the session
 
   if (!user) {
     return res.status(401).json({ error: "Unauthorized" });
@@ -102,7 +53,7 @@ router.get("/download", (req, res) => {
   let query = "";
   let params = [];
 
-  // ✅ אם המשתמש הוא מנהל - שלוף את כל ההיסטוריות
+  //if the user rule is admin - pull all history
   if (user.role === "admin") {
     query = `
       SELECT f.id, f.user_id, u.username, f.path_name, f.points, f.timestamp

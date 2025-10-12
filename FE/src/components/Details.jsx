@@ -138,7 +138,7 @@ function Details({ existingDrone = null, onClose = null }) {
           }
         />
 
-        {/*Save Button with Saving... State */}
+        {/*Save Button with Saving*/}
         <button className={styles.saveButton} type="submit" disabled={saving}>
           {saving ? "Saving..." : "Save"}
         </button>

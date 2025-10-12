@@ -231,11 +231,7 @@ const FlightPoints = ({ user }) => {
     if (!droneRef.current || !containerRef.current || !baseRef.current) return;
     if (live) await new Promise((resolve) => setTimeout(resolve, 12000));
     setDroneVisible(true);
-    // const startEl = baseRef.current;
-    // const startRect = startEl.getBoundingClientRect();
-    // const containerRect = containerRef.current.getBoundingClientRect();
-    // droneRef.current.style.left = `${startRect.left - containerRect.left}px`;
-    // droneRef.current.style.top = `${startRect.top - containerRect.top}px`;
+
     const drone = droneRef.current;
     const base = baseRef.current;
     const basePos = getXY(base);
@@ -424,7 +420,7 @@ const FlightPoints = ({ user }) => {
           Battery Level:
           {batteryLevel}%
         </div>
-        {/* ✅ Step size control - appears centered under the grid */}
+        {/* Step size control */}
         {user.role === "admin" && (
           <div className={styles.stepSizeBox}>
             <strong>Grid Step Size:</strong>{" "}

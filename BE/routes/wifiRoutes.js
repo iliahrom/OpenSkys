@@ -6,7 +6,7 @@ const { exec } = require("child_process");
 router.get("/", (req, res) => {
   exec("netsh wlan show networks mode=bssid", (err, stdout, stderr) => {
     if (err) {
-      console.error("❌ Error scanning WiFi:", err);
+      console.error("Error scanning WiFi:", err);
       return res.status(500).json({ error: "Failed to scan WiFi" });
     }
 
@@ -29,7 +29,7 @@ router.get("/", (req, res) => {
   });
 });
 
-// התחברות לרשת WiFi לפי שם
+// connection to the wifi via SSID name
 router.post("/connect", (req, res) => {
   const { ssid } = req.body;
   if (!ssid) {
@@ -38,11 +38,11 @@ router.post("/connect", (req, res) => {
 
   exec(`netsh wlan connect name="${ssid}"`, (err, stdout, stderr) => {
     if (err) {
-      console.error("❌ Error connecting to WiFi:", err);
+      console.error("Error connecting to WiFi:", err);
       return res.status(500).json({ error: "Failed to connect to WiFi" });
     }
 
-    console.log(`📶 Connected to WiFi: ${ssid}`);
+    console.log(`Connected to WiFi: ${ssid}`);
     res.json({ message: `Connected to ${ssid}` });
   });
 });

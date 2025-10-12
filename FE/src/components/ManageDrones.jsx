@@ -25,12 +25,12 @@
     };
 
     const handleAddNew = () => {
-      setDroneToEdit(null); // ❗ No drone selected means "Add"
+      setDroneToEdit(null); // No drone selected means "Add"
       setShowForm(true);
     };
 
     const handleEdit = (drone) => {
-      setDroneToEdit(drone); // ❗ Set drone to edit
+      setDroneToEdit(drone); // Set drone to edit
       setShowForm(true);
     };
 

@@ -1,5 +1,4 @@
 import React, { useState } from "react"; //Importing React and the useState hook
-//import { Link } from "react-router-dom"; //Importing Link for navigation
 import styles from "../styles/Details.module.css"; //Importing CSS module for styling
 import axios from "axios"; //Importing axios for making API requests
 

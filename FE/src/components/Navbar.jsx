@@ -16,9 +16,6 @@ const Navbar = ({ user, handleLogout }) => {
           <li>
             <Link to="/contact">Contact</Link>
           </li>
-          {/* <li>
-            <Link to="/flight-points">Flight Points</Link>
-          </li> */}
         </ul>
       </div>
 

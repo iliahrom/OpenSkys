@@ -1,4 +1,4 @@
-/* רקע מלא למסך */
+/* total background */
 .container {
   display: flex;
   justify-content: center;
@@ -7,7 +7,6 @@
   width: 100vw;
   background: url("../assets/drone-bg.jpg") no-repeat center center;
   background-size: cover;
-  /* מבטיח שהתמונה תכסה את כל הרקע */
   background-position: center;
   background-repeat: no-repeat;
   background-attachment: fixed;
@@ -15,35 +14,34 @@
   padding: 0;
 }
 
-/* עיצוב הטופס */
+/* form style */
 .loginBox {
-  background: rgba(255, 255, 255, 0.15);
-  /* רקע שקוף למחצה */
-  backdrop-filter: blur(12px);
-  /* טשטוש זכוכית */
+  background: rgba(14, 24, 36, 0.6); /* כהה יותר לקריאות טובה */
+  backdrop-filter: blur(14px);
   padding: 25px;
   border-radius: 12px;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 4px 12px rgba(0, 255, 255, 0.15);
   width: 350px;
-  /* רוחב הטופס */
   text-align: center;
+  color: #eaf7ff;
+  border: 1px solid rgba(0, 255, 255, 0.1);
 }
 
-/* לוודא שהגוף של העמוד לא מוסיף שוליים מיותרים */
 body,
 html {
   margin: 0;
   padding: 0;
   height: 100%;
   width: 100%;
-  
 }
 
 h2 {
-  color: #333;
-  margin-bottom: 15px;
+  color: #00d4ff; /* טורקיז בולט */
+  margin-bottom: 20px;
+  font-size: 1.8rem;
 }
 
+/* input + label */
 .inputGroup {
   display: flex;
   flex-direction: column;
@@ -53,25 +51,71 @@ h2 {
 
 .inputGroup label {
   font-weight: bold;
-  margin-bottom: 5px;
+  margin-bottom: 6px;
+  color: #00d4ff; /* טורקיז זוהר */
+  text-shadow: 0 0 5px rgba(0, 212, 255, 0.3);
 }
 
 .inputGroup input {
   padding: 10px;
-  border: 1px solid #ccc;
-  border-radius: 5px;
+  border: 1px solid #1e3a5f;
+  border-radius: 6px;
+  background-color: rgba(255, 255, 255, 0.85);
+  color: #000; /* טקסט כהה וברור */
+  font-size: 1rem;
+  outline: none;
+  transition: 0.2s;
 }
 
+.inputGroup input:focus {
+  border-color: #00d4ff;
+  box-shadow: 0 0 5px rgba(0, 212, 255, 0.5);
+}
+
+/* login button */
 .loginButton {
-  background-color: blue;
+  background-color: #0078ff;
   color: white;
-  padding: 10px 20px;
+  padding: 12px 20px;
   border: none;
+  border-radius: 8px;
   cursor: pointer;
   font-size: 16px;
+  font-weight: bold;
   width: 100%;
+  transition: background-color 0.3s ease, transform 0.2s ease;
 }
 
 .loginButton:hover {
-  background-color: darkblue;
+  background-color: #00aaff;
+  transform: scale(1.03);
+}
+
+/* register link */
+.registerLink {
+  display: block;
+  margin-top: 15px;
+  color: #00d4ff;
+  font-weight: 500;
+  text-decoration: none;
+  text-align: center;
+  transition: 0.3s;
+}
+
+.registerLink:hover {
+  text-decoration: underline;
+  color: #33f3ff;
+}
+
+/* error/success messages */
+.error {
+  color: #ff5555;
+  margin-bottom: 10px;
+  font-weight: bold;
+}
+
+.success {
+  color: #00ffcc;
+  margin-bottom: 10px;
+  font-weight: bold;
 }
