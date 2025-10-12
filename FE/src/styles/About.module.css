@@ -108,7 +108,7 @@
 }
 
 .galleryFrame {
-  width: 35%; /* במקום 60% — מצמצם את הרוחב */
+  width: 35%; 
   margin: 25px auto;
   background: #121e2a;
   border: 1px solid #22394e;
